@@ -51,7 +51,28 @@ function readFrames(state, chunk, onText) {
   }
 }
 
+// TV, 127.0.0.1'den gelen bağlantıları "host" sayıyor ve tuşlarını uygulamıyor.
+// Bu yüzden TV'ye kendi ağ adresinden, dışarıdan bir cihaz gibi bağlanıyoruz.
+var tvIp = null;
+
+function getTvIp(cb) {
+  if (tvIp) return cb(tvIp);
+  http.get('http://127.0.0.1:8001/api/v2/', function (r) {
+    var d = '';
+    r.setEncoding('utf8');
+    r.on('data', function (c) { d += c; });
+    r.on('end', function () {
+      try { tvIp = JSON.parse(d).device.ip || null; } catch (e) {}
+      cb(tvIp || '127.0.0.1');
+    });
+  }).on('error', function () { cb('127.0.0.1'); });
+}
+
 function sendKey(key, token, cb) {
+  getTvIp(function (host) { sendKeyTo(host, key, token, cb); });
+}
+
+function sendKeyTo(host, key, token, cb) {
   var name = buf('Ana Ekran', 'utf8').toString('base64');
   var path = '/api/v2/channels/samsung.remote.control?name=' + encodeURIComponent(name) +
     (token ? '&token=' + encodeURIComponent(token) : '');
@@ -66,10 +87,10 @@ function sendKey(key, token, cb) {
   // İlk bağlantıda TV izin sorar; kullanıcıya 30 sn tanı
   var timer = setTimeout(function () { finish({ ok: false, error: 'timeout' }); }, 30000);
 
-  var sock = tls.connect({ host: '127.0.0.1', port: 8002, rejectUnauthorized: false }, function () {
+  var sock = tls.connect({ host: host, port: 8002, rejectUnauthorized: false }, function () {
     sock.write(
       'GET ' + path + ' HTTP/1.1\r\n' +
-      'Host: 127.0.0.1:8002\r\n' +
+      'Host: ' + host + ':8002\r\n' +
       'Upgrade: websocket\r\n' +
       'Connection: Upgrade\r\n' +
       'Sec-WebSocket-Key: ' + crypto.randomBytes(16).toString('base64') + '\r\n' +

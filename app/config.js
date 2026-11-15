@@ -34,6 +34,7 @@ window.CONFIG = {
   apps: {
     netflix: { ids: ['3201907018807', '11101200001'], name: 'Netflix' },
     youtube: { ids: ['111299001912'], name: 'YouTube' },
+    tv: { ids: [], name: 'Canlı TV' },
     prime: { ids: ['3201512006785'], name: 'Prime Video' },
     disney: { ids: ['3201901017640'], name: 'Disney+' },
     spotify: { ids: ['3201606009684'], name: 'Spotify' },

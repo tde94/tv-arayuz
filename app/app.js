@@ -165,6 +165,7 @@
     if (!isTV) return toast(label + ' (önizleme)');
     var token = '';
     try { token = localStorage.getItem('tvToken') || ''; } catch (e) {}
+    toast(label + ' açılıyor…');
     fetch(C.serviceUrl + '/key?k=' + key + '&token=' + encodeURIComponent(token))
       .then(function (r) { return r.json(); })
       .then(function (j) {
@@ -223,6 +224,143 @@
 
   if (!C.blur) document.body.classList.add('no-blur');
 
+  /* ---------- Canlı TV ---------- */
+  var CH = window.CHANNELS || [];
+  var KEY = { back: 10009, chUp: 427, chDown: 428, esc: 27 };
+  var tv = { open: false, idx: 0, listOpen: false, listIdx: 0, hls: null, bannerTimer: null, digits: '', digitTimer: null };
+  try { tv.idx = +localStorage.getItem('tvChannel') || 0; } catch (e) {}
+  if (tv.idx >= CH.length) tv.idx = 0;
+
+  // Kanal tuşları ve rakamlar varsayılan olarak TV'ye gider; uygulamaya yönlendir
+  if (window.tizen && tizen.tvinputdevice) {
+    ['ChannelUp', 'ChannelDown', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(function (k) {
+      try { tizen.tvinputdevice.registerKey(k); } catch (e) {}
+    });
+  }
+
+  var video = $('tv-video');
+  video.addEventListener('playing', function () { $('tv-status').textContent = ''; });
+  video.addEventListener('waiting', function () { $('tv-status').textContent = 'Yükleniyor…'; });
+  video.addEventListener('error', function () { $('tv-status').textContent = 'Bu kanal şu an açılamıyor'; });
+
+  // TV yayını (HLS) doğrudan oynatabiliyorsa onu kullan; yoksa hls.js yükle (önizleme)
+  function loadHls(cb) {
+    if (window.Hls) return cb();
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function stopVideo() {
+    if (tv.hls) { tv.hls.destroy(); tv.hls = null; }
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+  }
+
+  function play(i) {
+    tv.idx = (i + CH.length) % CH.length;
+    var ch = CH[tv.idx];
+    try { localStorage.setItem('tvChannel', tv.idx); } catch (e) {}
+    stopVideo();
+    $('tv-status').textContent = 'Yükleniyor…';
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = ch.url;
+      video.play().catch(function () {});
+    } else {
+      loadHls(function () {
+        if (CH[tv.idx] !== ch) return;
+        tv.hls = new Hls();
+        tv.hls.loadSource(ch.url);
+        tv.hls.attachMedia(video);
+        video.play().catch(function () {});
+      });
+    }
+    showBanner();
+    if (tv.listOpen) renderList();
+  }
+
+  function showBanner() {
+    var ch = CH[tv.idx];
+    $('tv-logo').src = ch.logo;
+    $('tv-name').textContent = ch.name;
+    $('tv-meta').textContent = (tv.idx + 1) + '. kanal, ' + ch.group;
+    $('tv-banner').classList.add('show');
+    clearTimeout(tv.bannerTimer);
+    tv.bannerTimer = setTimeout(function () { $('tv-banner').classList.remove('show'); }, 4000);
+  }
+
+  function renderList() {
+    var html = '';
+    var group = null;
+    CH.forEach(function (ch, i) {
+      if (ch.group !== group) { group = ch.group; html += '<div class="tv-group">' + group + '</div>'; }
+      html += '<div class="tv-item' + (i === tv.listIdx ? ' focused' : '') + (i === tv.idx ? ' current' : '') + '">' +
+        '<span class="tv-item-num">' + (i + 1) + '</span>' + ch.name + '</div>';
+    });
+    var list = $('tv-list');
+    list.innerHTML = html;
+    // Seçili kanal ekranın ortasına yakın dursun
+    var el = list.querySelector('.tv-item.focused');
+    list.scrollTop = Math.max(0, el.offsetTop - 420);
+  }
+
+  function setList(open) {
+    tv.listOpen = open;
+    $('tv-list').hidden = !open;
+    if (open) { tv.listIdx = tv.idx; renderList(); }
+  }
+
+  function openTV() {
+    if (!CH.length) return toast('Kanal listesi boş');
+    tv.open = true;
+    $('tv').hidden = false;
+    $('stage').style.display = 'none';
+    play(tv.idx);
+  }
+
+  function closeTV() {
+    tv.open = false;
+    setList(false);
+    stopVideo();
+    $('tv').hidden = true;
+    $('stage').style.display = '';
+  }
+
+  function typeDigit(d) {
+    tv.digits += d;
+    $('tv-meta').textContent = 'Kanal ' + tv.digits;
+    $('tv-banner').classList.add('show');
+    clearTimeout(tv.digitTimer);
+    tv.digitTimer = setTimeout(function () {
+      var n = parseInt(tv.digits, 10);
+      tv.digits = '';
+      if (n >= 1 && n <= CH.length) play(n - 1);
+      else showBanner();
+    }, 1500);
+  }
+
+  // Canlı TV açıkken tuşları burada karşıla; işlendiyse true döner
+  function tvKey(code) {
+    if (code >= 48 && code <= 57) { typeDigit(String(code - 48)); return true; }
+    if (tv.listOpen) {
+      if (code === 38) { tv.listIdx = Math.max(0, tv.listIdx - 1); renderList(); }
+      else if (code === 40) { tv.listIdx = Math.min(CH.length - 1, tv.listIdx + 1); renderList(); }
+      else if (code === 13) { play(tv.listIdx); setList(false); }
+      else if (code === 37 || code === KEY.back || code === KEY.esc) setList(false);
+      else return false;
+      return true;
+    }
+    if (code === 38 || code === KEY.chUp) play(tv.idx + 1);
+    else if (code === 40 || code === KEY.chDown) play(tv.idx - 1);
+    else if (code === 13) setList(true);
+    else if (code === 37 || code === 39) showBanner();
+    else if (code === KEY.back || code === KEY.esc) closeTV();
+    else return false;
+    return true;
+  }
+
   /* ---------- Kumanda ile gezinme ---------- */
   var pills = [].slice.call(document.querySelectorAll('.pill:not(.pill-static)'));
   var apps = [].slice.call(document.querySelectorAll('.app'));
@@ -267,6 +405,7 @@
   function activate() {
     var el = grid[pos.row][pos.col];
     if (el.dataset.key) sendKey(el.dataset.key, el.textContent.trim());
+    else if (el.dataset.app === 'tv') openTV();
     else if (el.dataset.app) launchApp(el.dataset.app);
     else if (el.dataset.device) {
       var dev = C.devices[el.dataset.device];
@@ -275,6 +414,10 @@
   }
 
   document.addEventListener('keydown', function (e) {
+    if (tv.open) {
+      if (tvKey(e.keyCode)) e.preventDefault();
+      return;
+    }
     switch (e.keyCode) {
       case 37: move(0, -1); break;
       case 39: move(0, 1); break;
@@ -297,4 +440,7 @@
   });
 
   paintFocus();
+
+  // Önizlemede index.html#tv ile doğrudan Canlı TV açılır
+  if (!isTV && location.hash === '#tv') openTV();
 })();

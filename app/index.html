@@ -55,6 +55,17 @@
               <span class="wm">YouTube</span>
             </span>
           </button>
+          <button class="app" data-app="tv" data-glow="#B00A14">
+            <span class="face face-tv">
+              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
+                <g fill="none" stroke="#fff" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="6" y="16" width="52" height="34" rx="5"/><path d="M24 6l8 10 8-10M22 56h20"/>
+                </g>
+                <circle cx="47" cy="25" r="3.5" fill="#fff"/>
+              </svg>
+              <span class="wm">Canlı TV</span>
+            </span>
+          </button>
           <button class="app" data-app="prime" data-glow="#0B6FD6">
             <span class="face face-prime"><span class="wm wm-prime">prime video</span></span>
           </button>
@@ -110,7 +121,22 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
 
+  <!-- Canlı TV: ana ekranın üstünde tam ekran oynatıcı -->
+  <div class="tv" id="tv" hidden>
+    <video id="tv-video" autoplay playsinline></video>
+    <div class="tv-status" id="tv-status"></div>
+    <div class="tv-banner" id="tv-banner">
+      <img class="tv-logo" id="tv-logo" alt="">
+      <div>
+        <div class="tv-name" id="tv-name"></div>
+        <div class="tv-meta" id="tv-meta"></div>
+      </div>
+    </div>
+    <div class="tv-list" id="tv-list" hidden></div>
+  </div>
+
   <script src="config.js"></script>
+  <script src="channels.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
