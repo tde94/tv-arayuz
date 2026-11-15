@@ -1,5 +1,7 @@
-// TizenBrew servis dosyası: TV üzerinde Node.js ile çalışır.
-// - /key?k=KEY_HDMI1 → TV'ye uzaktan kumanda tuşu gönderir (HDMI, kaynak, ayarlar)
+// TV üzerinde Node.js ile çalışan servis. İki şekilde çalışır:
+// TizenBrew modülünün servis dosyası olarak ya da bağımsız uygulamanın Tizen servisi olarak.
+// - /launch?ids=…&name=… → uygulama açar
+// - /key?k=KEY_HDMI1     → TV'ye uzaktan kumanda tuşu gönderir (HDMI, kaynak, ayarlar)
 // Eski Node sürümleriyle uyumlu kalması için ES5 yazıldı.
 var http = require('http');
 var tls = require('tls');
@@ -150,3 +152,8 @@ var server = http.createServer(function (req, res) {
 // Modül yeniden açıldığında eski servis hâlâ portu tutuyorsa çökme
 server.on('error', function () {});
 server.listen(PORT, '127.0.0.1');
+
+// Tizen servis yaşam döngüsü (bağımsız uygulamada çağrılır; sunucu yukarıda zaten başladı)
+module.exports.onStart = function () {};
+module.exports.onRequest = function () {};
+module.exports.onExit = function () {};

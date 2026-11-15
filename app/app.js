@@ -120,10 +120,21 @@
     tizen.application.launch(ids[0], done, function () { launchById(ids.slice(1), done, fail); });
   }
 
-  // Uygulamayı TV'deki servis açar (sayfanın tizen arayüzüne erişimi yok)
+  function launchByName(app) {
+    tizen.application.getAppsInfo(function (list) {
+      var want = app.name.toLowerCase();
+      var hit = list.filter(function (a) { return a.name && a.name.toLowerCase().indexOf(want) >= 0; })[0];
+      if (hit) tizen.application.launch(hit.id);
+      else toast(app.name + ' bu TV\'de bulunamadı');
+    });
+  }
+
+  // Bağımsız uygulamada sayfa uygulamaları kendisi açar; TizenBrew modülünde
+  // sayfanın tizen arayüzü yok, o yüzden TV'deki servis açar.
   function launchApp(key) {
     var app = C.apps[key];
     if (!isTV) return toast(app.name + ' açılıyor (önizleme)');
+    if (window.tizen) return launchById(app.ids, function () {}, function () { launchByName(app); });
     fetch(C.serviceUrl + '/launch?ids=' + encodeURIComponent(app.ids.join(',')) + '&name=' + encodeURIComponent(app.name))
       .then(function (r) { return r.json(); })
       .then(function (j) {
@@ -132,12 +143,22 @@
           ? app.name + ' bu TV\'de bulunamadı'
           : app.name + ' açılamadı (' + j.error + ')');
       })
-      .catch(function () {
-        // Servis yoksa sayfanın kendi tizen arayüzünü dene
-        if (window.tizen) launchById(app.ids, function () {}, function () { toast(app.name + ' açılamadı'); });
-        else toast(app.name + ' açılamadı: servis çalışmıyor');
-      });
+      .catch(function () { toast(app.name + ' açılamadı: servis çalışmıyor'); });
   }
+
+  // Bağımsız uygulamada HDMI geçişi için kendi servisimizi başlat
+  function ensureService() {
+    if (!window.tizen) return;
+    fetch(C.serviceUrl + '/ping').catch(function () {
+      try {
+        var pkg = tizen.application.getCurrentApplication().appInfo.packageId;
+        tizen.application.launchAppControl(
+          new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/service'),
+          pkg + '.Service', null, function () {});
+      } catch (e) { /* servis yoksa yalnızca HDMI geçişi çalışmaz */ }
+    });
+  }
+  ensureService();
 
   // TV'ye kumanda tuşu gönderir (HDMI geçişi, kaynak menüsü, ayarlar)
   function sendKey(key, label) {
