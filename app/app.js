@@ -43,16 +43,25 @@
     var text = parts.map(function (u, i) {
       return u[0] + ' ' + (i === parts.length - 1 ? u[2] : u[1]);
     }).join(' ');
-    $('milestone').textContent = MS.names + ' ' + text + ' oldular.';
+    setText('milestone', MS.names + ' ' + text + ' oldular.');
     $('milestone').hidden = false;
   }
 
+  // Yazıyı sadece değiştiyse güncelle (TV'de her yeniden yazım ekranı yeniden çizdiriyor)
+  function setText(id, text) {
+    var el = $(id);
+    if (el.textContent !== text) el.textContent = text;
+  }
+
+  var lastMinute = -1;
   function tick() {
     var d = new Date();
+    if (d.getMinutes() === lastMinute) return;
+    lastMinute = d.getMinutes();
     milestone(d);
-    $('greeting').textContent = greeting(d.getHours()) + (C.userName ? ', ' + C.userName : '');
-    $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
-    $('date').textContent = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+    setText('greeting', greeting(d.getHours()) + (C.userName ? ', ' + C.userName : ''));
+    setText('clock', pad(d.getHours()) + ':' + pad(d.getMinutes()));
+    setText('date', d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }));
   }
   tick();
   setInterval(tick, 1000);

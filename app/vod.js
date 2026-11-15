@@ -94,15 +94,25 @@
     return shows;
   }
 
-  function load(i, cb) {
-    if (cache[i]) return cb(cache[i]);
+  // Önce uygulamanın içindeki hazır veri (tools/build-vod.py), yoksa GitHub'daki ham liste
+  function loadRemote(i, cb) {
     var src = SOURCES[i];
     Promise.all(src.files.map(function (f) {
       return fetch(BASE + f).then(function (r) { return r.text(); }).then(parseM3u).catch(function () { return []; });
-    })).then(function (lists) {
-      cache[i] = groupShows(src, [].concat.apply([], lists));
-      cb(cache[i]);
-    });
+    })).then(function (lists) { cb(groupShows(src, [].concat.apply([], lists))); });
+  }
+
+  function load(i, cb) {
+    if (cache[i]) return cb(cache[i]);
+    fetch('vod-data/' + i + '.json')
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (data) {
+        return data.map(function (s) {
+          return { name: s.name, logo: s.logo, eps: s.eps.map(function (e) { return { title: e[0], url: e[1], logo: '' }; }) };
+        });
+      })
+      .then(function (shows) { cache[i] = shows; cb(shows); })
+      .catch(function () { loadRemote(i, function (shows) { cache[i] = shows; cb(shows); }); });
   }
 
   /* ---------- İlerleme (kaldığın yer) ---------- */
@@ -145,8 +155,8 @@
     if (!shows) { $('vod-body').innerHTML = '<div class="vod-empty">Yükleniyor…</div>'; return; }
     if (!shows.length) { $('vod-body').innerHTML = '<div class="vod-empty">Bu arşiv şu an açılamıyor.</div>'; return; }
     $('vod-body').innerHTML = '<div class="vod-grid" id="vod-grid">' + shows.map(function (s, i) {
-      return '<div class="vod-card' + (state.level === 'grid' && i === state.show ? ' focused' : '') + '">' +
-        '<div class="vod-poster">' + (s.logo ? '<img src="' + esc(s.logo) + '" alt="">' : '') + '</div>' +
+      return '<div class="vod-card' + (state.level === 'grid' && i === state.show ? ' focused' : '') + '" data-i="' + i + '">' +
+        '<div class="vod-poster">' + (s.logo ? '<img data-src="' + esc(s.logo) + '" alt="">' : '') + '</div>' +
         '<div class="vod-card-title">' + esc(s.name) + '</div>' +
         '<div class="vod-card-meta">' + (SOURCES[state.src].films ? 'Film' : s.eps.length + ' bölüm') + '</div></div>';
     }).join('') + '</div>';
@@ -158,6 +168,21 @@
     if (!grid) return;
     var row = state.level === 'grid' ? Math.floor(state.show / COLS) : 0;
     grid.style.transform = 'translateY(' + -Math.max(0, row - 1) * 300 + 'px)';
+    loadPosters(row);
+  }
+
+  // Afişler sadece görünen satırlar ve bir altı için yüklenir (100+ resim TV'yi yavaşlatıyor)
+  function loadPosters(row) {
+    var imgs = document.querySelectorAll('.vod-grid img[data-src]');
+    var first = Math.max(0, row - 1) * COLS;
+    var last = (row + 4) * COLS;
+    for (var i = 0; i < imgs.length; i++) {
+      var idx = +imgs[i].parentNode.parentNode.getAttribute('data-i');
+      if (idx >= first && idx < last) {
+        imgs[i].src = imgs[i].getAttribute('data-src');
+        imgs[i].removeAttribute('data-src');
+      }
+    }
   }
 
   function paintGrid() {
@@ -200,13 +225,19 @@
     state.shows = cache[state.src] || null;
     renderTabs();
     renderGrid();
+    // Sekmeler arasında hızlı gezerken her birini yükleme; durduğu sekmeyi yükle
+    clearTimeout(loadTimer);
+    if (cache[state.src]) return;
     var want = state.src;
-    load(want, function (shows) {
-      if (state.src !== want) return;
-      state.shows = shows;
-      if (state.level !== 'eps') renderGrid();
-    });
+    loadTimer = setTimeout(function () {
+      load(want, function (shows) {
+        if (state.src !== want) return;
+        state.shows = shows;
+        if (state.level !== 'eps') renderGrid();
+      });
+    }, 350);
   }
+  var loadTimer = null;
 
   function open() {
     state.open = true;
