@@ -23,6 +23,22 @@ SOURCES = [
     ('Çocuk', False, ['www-cartoonnetwork-com-tr/videolar.m3u']),
 ]
 OUT = os.path.join(os.path.dirname(__file__), '..', 'app', 'vod-data')
+
+# Sadece diziler kalsın: haber, yemek, sağlık, yarışma, magazin, belgesel ve gündüz programları çıkarılır
+NOT_SERIES = {
+    'Star TV': ['Sabahın Sultanı Seda Sayan', 'Zahide Yetiş ile Yeniden Başlasak', 'Star Haber',
+                'Vahe ile Evdeki Mutluluk', 'Çok Güzel Hareketler 2', 'Dr. Özgür Koldaş ile Sağlık Gündemi',
+                'En Güzel Bölüm'],
+    'TV8': ['Survivor', "Zuhal Topal'la Yemekteyiz", 'Doya Doya Moda', 'Cevap Ver Türkiye', 'Çarkıfelek',
+            '2.Sayfa', "8'de Sağlık", 'Gençlik Rüzgarı', 'Gazete Magazin', 'Bir Yemek Olsan', '10 Yaş Genç',
+            "Demet ve Jess'le Gel Konuşalım", 'Aramızda Kalmasın', 'Survivor Panorama', "8'de Bugün",
+            'Apartmanlar Yarışıyor', 'Çook Yaşa', 'En Şık Benim', 'Eser Yenenler Show', 'Gel Konuşalım',
+            'Gerçeğin Peşinde', 'Göz6', 'Hayalimdeki Değişim', 'Lezzet Düşkünleri', 'Mutfakta Türev Var',
+            'Paylaş Benimle'],
+    'TRT 1': ['Bekir Develi ile Annemin Yemeği', 'Büyük Sürgün Kafkasya', 'Dinle Kazan', 'Heredot Cevdet Saati',
+              'İyilik Kulübü', 'Kıssalı Harikalar Kumpanyası', 'Komşum Benim', 'Mukabele', 'Pastane',
+              'Sanayi Savaşları', 'Seddülbahir 32 Saat', 'Şimdi Onlar Düşünsün', 'Zeyrek ile Çeyrek', '1 Gün Kala'],
+}
 EP_NO = re.compile(r'(\d+)\s*\.?\s*b[öo]l[üu]m', re.I)
 
 
@@ -67,6 +83,8 @@ def main():
                 by_name[key] = {'name': key, 'logo': it['logo'], 'eps': []}
                 shows.append(by_name[key])
             by_name[key]['eps'].append(it)
+        skip = set(NOT_SERIES.get(name, []))
+        shows = [s for s in shows if s['name'] not in skip]
         # Bölüm: [başlık, adres]; ekranda sadece dizinin afişi kullanılıyor
         data = [{'name': s['name'], 'logo': s['logo'],
                  'eps': [[e['title'], e['url']] for e in tidy(s['eps'])]}
