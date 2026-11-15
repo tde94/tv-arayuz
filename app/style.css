@@ -553,3 +553,10 @@ button {
 }
 
 .tv-item.focused .tv-item-num { color: rgba(5, 6, 10, 0.55); }
+
+.face-tabii { background: #0A0A0A; }
+.wm-tabii { font-size: 46px; font-weight: 700; letter-spacing: -0.03em; }
+.face-tod { background: linear-gradient(150deg, #7B2CBF 0%, #2D0A4E 100%); }
+.wm-tod { font-size: 50px; font-weight: 700; letter-spacing: 0.02em; }
+
+.tv-item-num { width: 64px; white-space: nowrap; }

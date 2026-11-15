@@ -125,7 +125,7 @@
       var want = app.name.toLowerCase();
       var hit = list.filter(function (a) { return a.name && a.name.toLowerCase().indexOf(want) >= 0; })[0];
       if (hit) tizen.application.launch(hit.id);
-      else toast(app.name + ' bu TV\'de bulunamadı');
+      else toast(app.name + ' yüklü değil. Samsung uygulama mağazasından yükleyebilirsin.');
     });
   }
 
@@ -140,7 +140,7 @@
       .then(function (j) {
         if (j.ok) return;
         toast(j.error === 'not-found'
-          ? app.name + ' bu TV\'de bulunamadı'
+          ? app.name + ' yüklü değil. Samsung uygulama mağazasından yükleyebilirsin.'
           : app.name + ' açılamadı (' + j.error + ')');
       })
       .catch(function () { toast(app.name + ' açılamadı: servis çalışmıyor'); });
@@ -305,19 +305,28 @@
     tv.bannerTimer = setTimeout(function () { $('tv-banner').classList.remove('show'); }, 4000);
   }
 
-  function renderList() {
+  // Liste bir kez çizilir; gezinirken sadece sınıflar değişir (90+ kanalda TV yavaşlamasın)
+  var listItems = null;
+
+  function buildList() {
     var html = '';
     var group = null;
     CH.forEach(function (ch, i) {
       if (ch.group !== group) { group = ch.group; html += '<div class="tv-group">' + group + '</div>'; }
-      html += '<div class="tv-item' + (i === tv.listIdx ? ' focused' : '') + (i === tv.idx ? ' current' : '') + '">' +
-        '<span class="tv-item-num">' + (i + 1) + '</span>' + ch.name + '</div>';
+      html += '<div class="tv-item"><span class="tv-item-num">' + (i + 1) + '</span>' + ch.name + '</div>';
     });
-    var list = $('tv-list');
-    list.innerHTML = html;
+    $('tv-list').innerHTML = html;
+    listItems = [].slice.call($('tv-list').querySelectorAll('.tv-item'));
+  }
+
+  function renderList() {
+    if (!listItems) buildList();
+    listItems.forEach(function (el, i) {
+      el.classList.toggle('focused', i === tv.listIdx);
+      el.classList.toggle('current', i === tv.idx);
+    });
     // Seçili kanal ekranın ortasına yakın dursun
-    var el = list.querySelector('.tv-item.focused');
-    list.scrollTop = Math.max(0, el.offsetTop - 420);
+    $('tv-list').scrollTop = Math.max(0, listItems[tv.listIdx].offsetTop - 420);
   }
 
   function setList(open) {
