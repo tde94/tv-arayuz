@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, height=1080">
+  <title>Ana Ekran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <div class="sky" id="sky"></div>
+
+    <header class="top">
+      <div class="time-block">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="date"></div>
+      </div>
+      <div class="weather" id="weather" hidden>
+        <div class="weather-icon" id="weather-icon"></div>
+        <div class="weather-text">
+          <div class="weather-temp" id="weather-temp"></div>
+          <div class="weather-desc" id="weather-desc"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="rows">
+      <section class="row videos-row" id="videos-row" hidden>
+        <h2 class="row-title">Kanallarından yeni</h2>
+        <div class="videos" id="videos"></div>
+      </section>
+
+      <section class="row apps-row">
+        <div class="apps apps-main">
+          <button class="app app-netflix" data-action="netflix">
+            <span class="app-face">
+              <svg viewBox="0 0 120 200" class="netflix-n" aria-hidden="true">
+                <path d="M0 0h34l52 150V0h34v200H86L34 52v148H0z" fill="#E50914"/>
+                <path d="M34 0 86 150v50L34 52z" fill="#B1060F"/>
+              </svg>
+            </span>
+            <span class="app-name">Netflix</span>
+          </button>
+          <button class="app app-youtube" data-action="youtube">
+            <span class="app-face">
+              <svg viewBox="0 0 160 112" class="yt-mark" aria-hidden="true">
+                <rect width="160" height="112" rx="30" fill="#FF0033"/>
+                <path d="M64 32v48l42-24z" fill="#fff"/>
+              </svg>
+            </span>
+            <span class="app-name">YouTube</span>
+          </button>
+          <button class="app app-playstation" data-action="playstation">
+            <span class="app-face">
+              <svg viewBox="0 0 64 64" class="ps-mark" aria-hidden="true">
+                <g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 24h22c7 0 11 6 12.5 13l2 9.5c.8 4-3.8 6.5-6.8 3.6L44 43H20l-6.7 7.1c-3 2.9-7.6.4-6.8-3.6l2-9.5C10 30 14 24 21 24z"/>
+                  <path d="M20 31v8M16 35h8"/>
+                </g>
+                <circle cx="42" cy="32" r="2.2" fill="#fff"/>
+                <circle cx="47" cy="37" r="2.2" fill="#fff"/>
+              </svg>
+            </span>
+            <span class="app-name">PlayStation</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="row more-row">
+        <div class="apps apps-more">
+          <button class="app app-small app-prime" data-app="prime">
+            <span class="app-face"><span class="wordmark">prime video</span></span>
+            <span class="app-name">Prime Video</span>
+          </button>
+          <button class="app app-small app-disney" data-app="disney">
+            <span class="app-face"><span class="wordmark">Disney+</span></span>
+            <span class="app-name">Disney+</span>
+          </button>
+          <button class="app app-small app-spotify" data-app="spotify">
+            <span class="app-face">
+              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
+                <circle cx="32" cy="32" r="28" fill="#1ED760"/>
+                <g fill="none" stroke="#000" stroke-linecap="round">
+                  <path d="M17 24c10-3.5 21-2.8 30 2" stroke-width="4.2"/>
+                  <path d="M19 33c8.5-2.8 17.5-2 24.5 1.8" stroke-width="3.5"/>
+                  <path d="M21 41.5c6.5-2 13.5-1.4 19 1.4" stroke-width="2.8"/>
+                </g>
+              </svg>
+            </span>
+            <span class="app-name">Spotify</span>
+          </button>
+          <button class="app app-small app-browser" data-app="browser">
+            <span class="app-face">
+              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
+                <g fill="none" stroke="#fff" stroke-width="2.6">
+                  <circle cx="32" cy="32" r="24"/>
+                  <ellipse cx="32" cy="32" rx="10" ry="24"/>
+                  <path d="M8 32h48M12 20h40M12 44h40"/>
+                </g>
+              </svg>
+            </span>
+            <span class="app-name">Internet</span>
+          </button>
+          <button class="app app-small app-smartthings" data-app="smartthings">
+            <span class="app-face">
+              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
+                <g fill="none" stroke="#fff" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round">
+                  <path d="M12 30 32 13l20 17v21H12z"/>
+                  <circle cx="32" cy="37" r="6"/>
+                </g>
+              </svg>
+            </span>
+            <span class="app-name">SmartThings</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

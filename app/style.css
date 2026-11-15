@@ -1,0 +1,281 @@
+:root {
+  --text: #F2F4F8;
+  --muted: rgba(242, 244, 248, 0.58);
+  --faint: rgba(242, 244, 248, 0.14);
+  --sky-top: #050913;
+  --sky-mid: #0B1630;
+  --sky-glow: #1C2F5E;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #04070F;
+  color: var(--text);
+  font-family: 'Figtree', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sahne her zaman 1920×1080; daha küçük ekranlarda (önizleme) ölçeklenir. */
+#stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+  padding: 72px 112px 64px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(1400px 700px at 78% 112%, var(--sky-glow) 0%, transparent 70%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 100%);
+  transition: background 4s linear;
+}
+
+/* Üst bölüm: saat ekranın ana unsuru */
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.clock {
+  font-family: 'Sora', sans-serif;
+  font-weight: 100;
+  font-size: 200px;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  margin-left: -10px;
+}
+
+.date {
+  margin-top: 18px;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.weather {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.weather[hidden] { display: none; }
+
+.weather-icon svg { width: 84px; height: 84px; display: block; }
+
+.weather-temp {
+  font-family: 'Sora', sans-serif;
+  font-weight: 200;
+  font-size: 64px;
+  line-height: 1;
+}
+
+.weather-desc {
+  margin-top: 8px;
+  font-size: 26px;
+  color: var(--muted);
+}
+
+/* Satırlar */
+.rows {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.row[hidden] { display: none; }
+
+.row-title {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.videos, .apps {
+  display: flex;
+  gap: 40px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Video kartları */
+.video {
+  display: block;
+  width: 384px;
+  transition: transform 0.35s var(--ease);
+}
+
+.video-thumb {
+  position: relative;
+  display: block;
+  width: 384px;
+  height: 216px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--faint);
+  transition: box-shadow 0.35s var(--ease);
+}
+
+.video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-title {
+  display: block;
+  margin-top: 14px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  opacity: 0.72;
+  transition: opacity 0.35s var(--ease);
+}
+
+.video-channel {
+  display: block;
+  margin-top: 4px;
+  font-size: 19px;
+  color: var(--muted);
+}
+
+/* Uygulama kartları */
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.35s var(--ease);
+}
+
+.app-face {
+  position: relative;
+  width: 340px;
+  height: 204px;
+  border-radius: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: box-shadow 0.35s var(--ease);
+}
+
+/* Odaklanınca kartın üstünden geçen ışık */
+.app-face::after, .video-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0) 65%);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.app-small .app-face {
+  width: 248px;
+  height: 140px;
+  border-radius: 26px;
+}
+
+.app-small .app-name { margin-top: 14px; font-size: 21px; }
+
+.apps-more { gap: 32px; }
+
+.wordmark {
+  font-weight: 600;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+}
+
+.glyph { width: 72px; }
+
+.app-netflix .app-face { background: #000; }
+.app-prime .app-face { background: #0F171E; color: #1FA8E1; }
+.app-disney .app-face { background: linear-gradient(150deg, #0B1A4A 0%, #133A7C 100%); color: #fff; }
+.app-disney .wordmark { font-size: 38px; font-weight: 500; }
+.app-spotify .app-face { background: #121212; }
+.app-browser .app-face { background: linear-gradient(150deg, #5B4BDB 0%, #3726A6 100%); }
+.app-smartthings .app-face { background: linear-gradient(150deg, #15BFAE 0%, #0A7E8C 100%); }
+.app-youtube .app-face { background: #FFFFFF; }
+.app-playstation .app-face { background: linear-gradient(160deg, #0A74DA 0%, #003791 100%); }
+
+.netflix-n { height: 120px; }
+.yt-mark { width: 132px; }
+.ps-mark { width: 116px; }
+
+.app-name {
+  margin-top: 18px;
+  font-size: 24px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+/* Odak durumu */
+.focused { transform: scale(1.09) translateY(-10px); }
+.app-small.focused { transform: scale(1.12) translateY(-6px); }
+
+.focused .app-face,
+.focused .video-thumb {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.92),
+    0 36px 70px rgba(0, 0, 0, 0.55);
+}
+
+.focused .app-face::after,
+.focused .video-thumb::after {
+  opacity: 1;
+  transform: translateX(100%);
+  transition: transform 0.9s var(--ease), opacity 0.2s;
+}
+
+.focused .app-name { opacity: 1; transform: none; }
+.focused .video-title { opacity: 1; }
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 72px;
+  transform: translate(-50%, -20px);
+  padding: 18px 34px;
+  border-radius: 999px;
+  background: rgba(20, 26, 40, 0.86);
+  font-size: 26px;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s var(--ease);
+  pointer-events: none;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::after { transition: none !important; }
+}
