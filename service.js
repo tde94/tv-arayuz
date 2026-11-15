@@ -111,10 +111,42 @@ function handleKey(q, res) {
   sendKey(key, q.token || '', function (result) { send(res, 200, result); });
 }
 
+/* ---------- Uygulama başlatma ---------- */
+// Modül sayfası TV'nin tizen arayüzüne erişemiyor; servis erişebiliyor.
+function launchIds(ids, cb) {
+  if (!ids.length) return cb(false);
+  tizen.application.launch(ids[0], function () { cb(true); }, function () { launchIds(ids.slice(1), cb); });
+}
+
+function handleLaunch(q, res) {
+  if (typeof tizen === 'undefined') return send(res, 500, { ok: false, error: 'no-tizen' });
+  var ids = (q.ids || '').split(',').filter(Boolean);
+  var name = (q.name || '').toLowerCase();
+  try {
+    launchIds(ids, function (ok) {
+      if (ok) return send(res, 200, { ok: true });
+      // Kimlik tutmadıysa yüklü uygulamalar arasında isimle ara
+      tizen.application.getAppsInfo(function (list) {
+        var hit = list.filter(function (a) { return a.name && a.name.toLowerCase().indexOf(name) >= 0; })[0];
+        if (!hit) return send(res, 200, { ok: false, error: 'not-found' });
+        tizen.application.launch(hit.id,
+          function () { send(res, 200, { ok: true, id: hit.id }); },
+          function (e) { send(res, 200, { ok: false, error: e && e.message }); });
+      }, function (e) { send(res, 200, { ok: false, error: e && e.message }); });
+    });
+  } catch (e) {
+    send(res, 200, { ok: false, error: e.message });
+  }
+}
+
 /* ---------- Sunucu ---------- */
-http.createServer(function (req, res) {
+var server = http.createServer(function (req, res) {
   var u = urlLib.parse(req.url, true);
+  if (u.pathname === '/launch') return handleLaunch(u.query, res);
   if (u.pathname === '/key') return handleKey(u.query, res);
   if (u.pathname === '/ping') return send(res, 200, { ok: true });
   send(res, 404, { error: 'not found' });
-}).listen(PORT, '127.0.0.1');
+});
+// Modül yeniden açıldığında eski servis hâlâ portu tutuyorsa çökme
+server.on('error', function () {});
+server.listen(PORT, '127.0.0.1');

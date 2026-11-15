@@ -2,7 +2,8 @@
   'use strict';
 
   var C = window.CONFIG;
-  var isTV = typeof window.tizen !== 'undefined';
+  // TizenBrew modülü 127.0.0.1:8081 üzerinden sunar; önizleme başka bir porttan açılır
+  var isTV = location.port === '8081' || typeof window.tizen !== 'undefined';
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------- Sahne ölçeği (TV'de 1, önizlemede pencereye sığar) ---------- */
@@ -119,18 +120,23 @@
     tizen.application.launch(ids[0], done, function () { launchById(ids.slice(1), done, fail); });
   }
 
+  // Uygulamayı TV'deki servis açar (sayfanın tizen arayüzüne erişimi yok)
   function launchApp(key) {
     var app = C.apps[key];
     if (!isTV) return toast(app.name + ' açılıyor (önizleme)');
-    launchById(app.ids, function () {}, function () {
-      // Kimlik tutmadıysa yüklü uygulamalar arasında isimle ara
-      tizen.application.getAppsInfo(function (list) {
-        var want = app.name.toLowerCase();
-        var hit = list.filter(function (a) { return a.name && a.name.toLowerCase().indexOf(want) >= 0; })[0];
-        if (hit) tizen.application.launch(hit.id);
-        else toast(app.name + ' bu TV\'de bulunamadı');
+    fetch(C.serviceUrl + '/launch?ids=' + encodeURIComponent(app.ids.join(',')) + '&name=' + encodeURIComponent(app.name))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.ok) return;
+        toast(j.error === 'not-found'
+          ? app.name + ' bu TV\'de bulunamadı'
+          : app.name + ' açılamadı (' + j.error + ')');
+      })
+      .catch(function () {
+        // Servis yoksa sayfanın kendi tizen arayüzünü dene
+        if (window.tizen) launchById(app.ids, function () {}, function () { toast(app.name + ' açılamadı'); });
+        else toast(app.name + ' açılamadı: servis çalışmıyor');
       });
-    });
   }
 
   // TV'ye kumanda tuşu gönderir (HDMI geçişi, kaynak menüsü, ayarlar)
@@ -144,9 +150,9 @@
         if (j.token) try { localStorage.setItem('tvToken', j.token); } catch (e) {}
         if (!j.ok) toast(j.error === 'timeout'
           ? 'TV ekranındaki izin sorusunda İzin ver\'i seç, sonra tekrar dene'
-          : label + ' açılamadı');
+          : label + ' açılamadı (' + j.error + ')');
       })
-      .catch(function () { toast(label + ' açılamadı'); });
+      .catch(function () { toast(label + ' açılamadı: servis çalışmıyor'); });
   }
 
   /* ---------- HDMI cihazları ---------- */
