@@ -239,43 +239,57 @@
   }
 
   var video = $('tv-video');
-  video.addEventListener('playing', function () { $('tv-status').textContent = ''; });
-  video.addEventListener('waiting', function () { $('tv-status').textContent = 'Yükleniyor…'; });
-  video.addEventListener('error', function () { $('tv-status').textContent = 'Bu kanal şu an açılamıyor'; });
-
-  // TV yayını (HLS) doğrudan oynatabiliyorsa onu kullan; yoksa hls.js yükle (önizleme)
-  function loadHls(cb) {
-    if (window.Hls) return cb();
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
-    s.onload = cb;
-    document.head.appendChild(s);
-  }
+  var status = function (s) { $('tv-status').textContent = s; };
+  video.addEventListener('playing', function () { clearTimeout(tv.stallTimer); status(''); });
+  video.addEventListener('waiting', function () { status('Yükleniyor…'); });
+  video.addEventListener('error', function () {
+    // hls.js zaten denendiyse ve TV'nin kendi oynatıcısı da açamadıysa vazgeç
+    if (tv.mode === 'native') status('Bu kanal şu an açılamıyor (oynatıcı hatası ' + (video.error ? video.error.code : '?') + ')');
+  });
 
   function stopVideo() {
+    clearTimeout(tv.stallTimer);
     if (tv.hls) { tv.hls.destroy(); tv.hls = null; }
     video.pause();
     video.removeAttribute('src');
     video.load();
   }
 
+  // TV'nin kendi oynatıcısıyla dene (CORS izni vermeyen kanallar için yedek)
+  function playNative(ch) {
+    if (tv.hls) { tv.hls.destroy(); tv.hls = null; }
+    tv.mode = 'native';
+    video.src = ch.url;
+    video.play().catch(function () {});
+    tv.stallTimer = setTimeout(function () {
+      if (CH[tv.idx] === ch && video.readyState < 3) status('Bu kanal şu an açılamıyor');
+    }, 20000);
+  }
+
+  // Önce hls.js (Samsung TV'nin <video> etiketi HLS'yi kendi başına açmıyor)
   function play(i) {
     tv.idx = (i + CH.length) % CH.length;
     var ch = CH[tv.idx];
     try { localStorage.setItem('tvChannel', tv.idx); } catch (e) {}
     stopVideo();
-    $('tv-status').textContent = 'Yükleniyor…';
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = ch.url;
-      video.play().catch(function () {});
-    } else {
-      loadHls(function () {
-        if (CH[tv.idx] !== ch) return;
-        tv.hls = new Hls();
-        tv.hls.loadSource(ch.url);
-        tv.hls.attachMedia(video);
-        video.play().catch(function () {});
+    status('Yükleniyor…');
+    if (window.Hls && Hls.isSupported()) {
+      tv.mode = 'hls';
+      tv.hls = new Hls({ maxBufferLength: 20 });
+      tv.hls.on(Hls.Events.MANIFEST_PARSED, function () { video.play().catch(function () {}); });
+      tv.hls.on(Hls.Events.ERROR, function (ev, data) {
+        if (!data.fatal || CH[tv.idx] !== ch) return;
+        status('Yükleniyor… (yedek oynatıcı)');
+        playNative(ch);
       });
+      tv.hls.loadSource(ch.url);
+      tv.hls.attachMedia(video);
+      // 15 sn'de görüntü gelmezse yedek oynatıcıya geç
+      tv.stallTimer = setTimeout(function () {
+        if (CH[tv.idx] === ch && video.readyState < 3) playNative(ch);
+      }, 15000);
+    } else {
+      playNative(ch);
     }
     showBanner();
     if (tv.listOpen) renderList();
