@@ -42,5 +42,5 @@ window.CONFIG = {
   },
 
   // TV'de çalışan modül servisinin adresi.
-  serviceUrl: 'http://127.0.0.1:8091'
+  serviceUrl: 'http://127.0.0.1:8095'
 };
