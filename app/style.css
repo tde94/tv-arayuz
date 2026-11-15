@@ -51,7 +51,8 @@ html, body {
   pointer-events: none;
   opacity: 0;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 30%, rgba(0, 0, 0, 0.25) 55%, rgba(0, 0, 0, 0.8) 100%);
+    linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 55%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 30%, rgba(0, 0, 0, 0.3) 55%, rgba(0, 0, 0, 0.85) 100%);
   transition: opacity 2s ease;
 }
 
@@ -419,4 +420,6 @@ button {
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
 }
 
-.has-photo .today-summary { color: rgba(244, 245, 248, 0.85); }
+.has-photo .today-summary,
+.has-photo .greeting,
+.has-photo .date { color: rgba(244, 245, 248, 0.88); }

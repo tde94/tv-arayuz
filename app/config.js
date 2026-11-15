@@ -11,9 +11,20 @@ window.CONFIG = {
     { name: 'PlayStation 5', hdmi: 1, icon: 'playstation', glow: '#0A5BC4' }
   ],
 
-  // Arka plan fotoğrafları: dosya yolu (photos/...) ya da internet adresi.
+  // Arka plan fotoğrafları (Tunceli): dosya yolu (photos/...) ya da internet adresi.
   // credit: sol altta küçük yazıyla gösterilir (boş olabilir).
-  photos: [],
+  photos: [
+    { src: 'photos/tunceli-01.jpg', credit: 'Munzur Dağları. Fotoğraf: Candan Özgen Kruşa, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-02.jpg', credit: 'Munzur Vadisi. Fotoğraf: Eren Mengeş, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-03.jpg', credit: 'Munzur Vadisi Milli Parkı. Fotoğraf: İshak çiçek, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-04.jpg', credit: 'Munzur Vadisi Milli Parkı. Fotoğraf: Eren Mengeş, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-05.jpg', credit: 'Munzur Gölü. Fotoğraf: Ilaydamtl, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-06.jpg', credit: 'Munzur Nehri. Fotoğraf: Zgcnkygsz, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-07.jpg', credit: 'Munzur Vadisi, kış. Fotoğraf: Azer Koçulu, CC0' },
+    { src: 'photos/tunceli-08.jpg', credit: 'Munzur Gözeleri, kış. Fotoğraf: Iskan21, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-09.jpg', credit: 'Pertek Kalesi. Fotoğraf: Ingeborg Simon, CC BY-SA 4.0' },
+    { src: 'photos/tunceli-10.jpg', credit: 'Munzur Vadisi. Fotoğraf: Mert Cem Taşkın, CC BY-SA 4.0' }
+  ],
   photoMinutes: 30,
 
   // Paneller buzlu cam gibi bulanık olsun mu? TV kasarsa false yap.
