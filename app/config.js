@@ -1,5 +1,8 @@
 // Arayüz ayarları — değiştirmek istediğin her şey burada.
 window.CONFIG = {
+  // Selamlamada gösterilecek isim (boş bırakılırsa sadece selam yazar)
+  userName: 'Taylan Deniz',
+
   // Hava durumu konumu
   location: { name: 'Lehrte', lat: 52.3725, lon: 9.9769 },
 

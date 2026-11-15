@@ -25,7 +25,7 @@
 
   function tick() {
     var d = new Date();
-    $('greeting').textContent = greeting(d.getHours());
+    $('greeting').textContent = greeting(d.getHours()) + (C.userName ? ', ' + C.userName : '');
     $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
     $('date').textContent = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
   }
