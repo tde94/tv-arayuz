@@ -628,3 +628,19 @@ button {
   color: #0A0C12;
   text-align: center;
 }
+
+/* Favoriler */
+.tv-hint {
+  margin: 0 16px 6px;
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.tv-item-star {
+  margin-left: auto;
+  color: #F5C518;
+  visibility: hidden;
+}
+
+.tv-item.fav .tv-item-star { visibility: visible; }
+.tv-item.focused .tv-item-star { color: #B8860B; }

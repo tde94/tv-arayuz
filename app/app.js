@@ -226,14 +226,14 @@
 
   /* ---------- Canlı TV ---------- */
   var CH = window.CHANNELS || [];
-  var KEY = { back: 10009, chUp: 427, chDown: 428, esc: 27 };
+  var KEY = { back: 10009, chUp: 427, chDown: 428, esc: 27, yellow: 405 };
   var tv = { open: false, idx: 0, listOpen: false, listIdx: 0, hls: null, bannerTimer: null, digits: '', digitTimer: null };
   try { tv.idx = +localStorage.getItem('tvChannel') || 0; } catch (e) {}
   if (tv.idx >= CH.length) tv.idx = 0;
 
   // Kanal tuşları ve rakamlar varsayılan olarak TV'ye gider; uygulamaya yönlendir
   if (window.tizen && tizen.tvinputdevice) {
-    ['ChannelUp', 'ChannelDown', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(function (k) {
+    ['ChannelUp', 'ChannelDown', 'ColorF2Yellow', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(function (k) {
       try { tizen.tvinputdevice.registerKey(k); } catch (e) {}
     });
   }
@@ -248,6 +248,22 @@
       return -1;
     }).filter(function (i) { return i >= 0; });
   }
+  // Favori kanallar (yine isimle saklanır)
+  function getFavs() {
+    var names = [];
+    try { names = JSON.parse(localStorage.getItem('tvFavs') || '[]'); } catch (e) {}
+    return CH.map(function (c, i) { return names.indexOf(c.name) >= 0 ? i : -1; })
+      .filter(function (i) { return i >= 0; });
+  }
+  function isFav(i) { return getFavs().indexOf(i) >= 0; }
+  function toggleFav(i) {
+    var names = getFavs().map(function (j) { return CH[j].name; });
+    var added = names.indexOf(CH[i].name) < 0;
+    names = added ? names.concat(CH[i].name) : names.filter(function (n) { return n !== CH[i].name; });
+    try { localStorage.setItem('tvFavs', JSON.stringify(names)); } catch (e) {}
+    return added;
+  }
+
   function addRecent(i) {
     var names = getRecent().map(function (j) { return CH[j].name; })
       .filter(function (n) { return n !== CH[i].name; });
@@ -340,11 +356,12 @@
   var listItems = null;
 
   function buildList() {
-    var html = '';
+    var html = '<div class="tv-hint">Sağ ok: favorilere ekle / çıkar</div>';
     var group = null;
     CH.forEach(function (ch, i) {
       if (ch.group !== group) { group = ch.group; html += '<div class="tv-group">' + group + '</div>'; }
-      html += '<div class="tv-item"><span class="tv-item-num">' + (i + 1) + '</span>' + ch.name + '</div>';
+      html += '<div class="tv-item"><span class="tv-item-num">' + (i + 1) + '</span>' + ch.name +
+        '<span class="tv-item-star">★</span></div>';
     });
     $('tv-list').innerHTML = html;
     listItems = [].slice.call($('tv-list').querySelectorAll('.tv-item'));
@@ -352,9 +369,11 @@
 
   function renderList() {
     if (!listItems) buildList();
+    var favs = getFavs();
     listItems.forEach(function (el, i) {
       el.classList.toggle('focused', i === tv.listIdx);
       el.classList.toggle('current', i === tv.idx);
+      el.classList.toggle('fav', favs.indexOf(i) >= 0);
     });
     // Seçili kanal ekranın ortasına yakın dursun
     $('tv-list').scrollTop = Math.max(0, listItems[tv.listIdx].offsetTop - 420);
@@ -404,6 +423,7 @@
       if (code === 38) { tv.listIdx = Math.max(0, tv.listIdx - 1); renderList(); }
       else if (code === 40) { tv.listIdx = Math.min(CH.length - 1, tv.listIdx + 1); renderList(); }
       else if (code === 13) { play(tv.listIdx); setList(false); }
+      else if (code === 39 || code === KEY.yellow) { toggleFav(tv.listIdx); renderList(); }
       else if (code === 37 || code === KEY.back || code === KEY.esc) setList(false);
       else return false;
       return true;
@@ -411,6 +431,11 @@
     if (code === 38 || code === KEY.chUp) play(tv.idx + 1);
     else if (code === 40 || code === KEY.chDown) play(tv.idx - 1);
     else if (code === 13) setList(true);
+    else if (code === KEY.yellow) {
+      var added = toggleFav(tv.idx);
+      showBanner();
+      $('tv-meta').textContent = added ? 'Favorilere eklendi ★' : 'Favorilerden çıkarıldı';
+    }
     else if (code === 37 || code === 39) showBanner();
     else if (code === KEY.back || code === KEY.esc) closeTV();
     else return false;
@@ -429,15 +454,21 @@
   var preview = [];
   var previewFor = null;
 
+  // Canlı TV: favoriler varsa onlar, yoksa son izlenenler
   function previewItems(appKey) {
-    if (appKey === 'tv') return getRecent();
-    return [];
+    if (appKey !== 'tv') return { items: [], title: '' };
+    var favs = getFavs();
+    return favs.length
+      ? { items: favs.slice(0, 8), title: 'Favori kanalların' }
+      : { items: getRecent(), title: 'Son izlediğin kanallar' };
   }
 
   function renderPreview(appKey) {
     if (appKey === previewFor) return;
     previewFor = appKey;
-    var items = previewItems(appKey);
+    var p = previewItems(appKey);
+    var items = p.items;
+    $('previews-title').textContent = p.title;
     $('previews').innerHTML = items.map(function (i) {
       var ch = CH[i];
       return '<button class="preview" data-channel="' + i + '">' +
