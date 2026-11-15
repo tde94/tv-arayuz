@@ -554,10 +554,17 @@ button {
 
 .tv-item.focused .tv-item-num { color: rgba(5, 6, 10, 0.55); }
 
-.face-tabii { background: #0A0A0A; }
-.wm-tabii { font-size: 46px; font-weight: 700; letter-spacing: -0.03em; }
-.face-tod { background: linear-gradient(150deg, #7B2CBF 0%, #2D0A4E 100%); }
-.wm-tod { font-size: 50px; font-weight: 700; letter-spacing: 0.02em; }
+/* Alman TV: koyu kart, altta siyah-kırmızı-altın şerit */
+.face-tvde { background: #161616; }
+.face-tvde::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  background: linear-gradient(90deg, #000 0 33.3%, #DD0000 33.3% 66.6%, #FFCE00 66.6% 100%);
+}
 
 .tv-item-num { width: 64px; white-space: nowrap; }
 

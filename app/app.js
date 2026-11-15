@@ -248,6 +248,18 @@
       return -1;
     }).filter(function (i) { return i >= 0; });
   }
+  function isGerman(i) { return CH[i].group.indexOf('Almanya') === 0; }
+  // O ülkede son izlenen kanal; hiç yoksa ilk kanal
+  function lastOf(german) {
+    var r = getRecent().filter(function (i) { return isGerman(i) === german; });
+    if (r.length) return r[0];
+    for (var i = 0; i < CH.length; i++) if (isGerman(i) === german) return i;
+    return 0;
+  }
+  function germanChannels() {
+    return CH.map(function (c, i) { return i; }).filter(isGerman);
+  }
+
   // Favori kanallar (yine isimle saklanır)
   function getFavs() {
     var names = [];
@@ -344,7 +356,9 @@
 
   function showBanner() {
     var ch = CH[tv.idx];
-    $('tv-logo').src = ch.logo;
+    var logo = $('tv-logo');
+    logo.hidden = !ch.logo;
+    if (ch.logo) logo.src = ch.logo;
     $('tv-name').textContent = ch.name;
     $('tv-meta').textContent = (tv.idx + 1) + '. kanal, ' + ch.group;
     $('tv-banner').classList.add('show');
@@ -492,17 +506,21 @@
   var preview = [];
   var previewFor = null;
 
-  // Canlı TV: favoriler, yoksa son izlenenler. YouTube: trend videolar.
+  // Canlı TV / Alman TV: o ülkenin favorileri, yoksa son izlenenleri, o da yoksa
+  // ilk kanalları. YouTube: trend videolar.
   function previewItems(appKey) {
     if (appKey === 'youtube') {
       return { items: ytVideos.map(function (v) { return { video: v }; }), title: 'Türkiye\'de trend' };
     }
-    if (appKey !== 'tv') return { items: [], title: '' };
-    var favs = getFavs();
-    var list = favs.length ? favs.slice(0, 8) : getRecent();
+    if (appKey !== 'tv' && appKey !== 'tvde') return { items: [], title: '' };
+    var de = appKey === 'tvde';
+    var mine = function (i) { return isGerman(i) === de; };
+    var favs = getFavs().filter(mine);
+    var recent = getRecent().filter(mine);
+    var list = favs.length ? favs : recent.length ? recent : (de ? germanChannels() : []);
     return {
-      items: list.map(function (i) { return { channel: i }; }),
-      title: favs.length ? 'Favori kanalların' : 'Son izlediğin kanallar'
+      items: list.slice(0, 8).map(function (i) { return { channel: i }; }),
+      title: favs.length ? 'Favori kanalların' : recent.length ? 'Son izlediğin kanallar' : 'Kanallar'
     };
   }
 
@@ -599,7 +617,8 @@
     if (el.dataset.key) sendKey(el.dataset.key, el.textContent.trim());
     else if (el.dataset.channel) openTV(+el.dataset.channel);
     else if (el.dataset.video) openVideo(el.dataset.video);
-    else if (el.dataset.app === 'tv') openTV();
+    else if (el.dataset.app === 'tv') openTV(isGerman(tv.idx) ? lastOf(false) : undefined);
+    else if (el.dataset.app === 'tvde') openTV(isGerman(tv.idx) ? undefined : lastOf(true));
     else if (el.dataset.app) launchApp(el.dataset.app);
     else if (el.dataset.device) {
       var dev = C.devices[el.dataset.device];

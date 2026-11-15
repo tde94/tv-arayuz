@@ -1,4 +1,4 @@
-// Canlı TV kanalları: yayıncıların kendi sunucularındaki ücretsiz yayınlar.
+// Canlı TV kanalları (Türk ve Alman): yayıncıların kendi sunucularındaki ücretsiz yayınlar.
 // Kaynak: iptv-org (https://github.com/iptv-org/iptv); izinsiz yeniden yayınlar ve
 // güvenilmeyen sunucular elendi, kalanlar Almanya'dan test edildi (Kasım 2026).
 // Yayıncılar adresleri değiştirebilir; açılmayan kanal olursa buradan güncellenir.
@@ -93,5 +93,25 @@ window.CHANNELS = [
   { name: "Tivi 6", group: "Yerel", url: "https://live.artidijitalmedya.com/artidijital_tivi6/tivi6/playlist.m3u8", logo: "https://i.imgur.com/Mbi0jbz.png" },
   { name: "Ton TV", group: "Yerel", url: "https://live.artidijitalmedya.com/artidijital_tontv/tontv/playlist.m3u8", logo: "https://i.imgur.com/f0Soeob.png" },
   { name: "Urfa Natik TV", group: "Yerel", url: "https://live.artidijitalmedya.com/artidijital_urfanatiktv/urfanatiktv/playlist.m3u8", logo: "https://i.imgur.com/8KO0uxn.png" },
-  { name: "Van 65 TV", group: "Yerel", url: "https://live.artidijitalmedya.com/artidijital_van65/van65/playlist.m3u8", logo: "https://van65tv.com/assets/images/logo/logo.png" }
+  { name: "Van 65 TV", group: "Yerel", url: "https://live.artidijitalmedya.com/artidijital_van65/van65/playlist.m3u8", logo: "https://van65tv.com/assets/images/logo/logo.png" },
+  { name: "Das Erste", group: "Almanya", url: "https://daserste-live.ard-mcdn.de/daserste/live/hls/int/master.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/ARD_Dachmarke_2014.svg/960px-ARD_Dachmarke_2014.svg.png" },
+  { name: "ZDF", group: "Almanya", url: "https://zdf-hls-15.akamaized.net/hls/live/2016498/de/high/master.m3u8", logo: "" },
+  { name: "ZDFneo", group: "Almanya", url: "https://zdf-hls-16.akamaized.net/hls/live/2016499/de/high/master.m3u8", logo: "" },
+  { name: "ZDFinfo", group: "Almanya", url: "https://zdf-hls-17.akamaized.net/hls/live/2016500/de/high/master.m3u8", logo: "https://i.imgur.com/vtq1IWp.png" },
+  { name: "3sat", group: "Almanya", url: "https://zdf-hls-18.akamaized.net/hls/live/2016501/dach/high/master.m3u8", logo: "" },
+  { name: "arte", group: "Almanya", url: "https://artesimulcast.akamaized.net/hls/live/2030993/artelive_de/index.m3u8", logo: "https://i.imgur.com/ecXMjNl.png" },
+  { name: "phoenix", group: "Almanya", url: "https://zdf-hls-19.akamaized.net/hls/live/2016502/de/high/master.m3u8", logo: "https://i.imgur.com/T1532t9.png" },
+  { name: "ONE", group: "Almanya", url: "https://mcdn-one.ard.de/ardone/hls/master.m3u8", logo: "" },
+  { name: "ARD alpha", group: "Almanya", url: "https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8", logo: "" },
+  { name: "tagesschau24", group: "Almanya", url: "https://tagesschau.akamaized.net/hls/live/2020115/tagesschau/tagesschau_1/master.m3u8", logo: "https://i.imgur.com/LH0Gctv.png" },
+  { name: "KiKA", group: "Almanya", url: "https://kikahls.akamaized.net/hls/live/2022690/livetvkika_ww/master.m3u8", logo: "https://i.imgur.com/vZdNp5S.png" },
+  { name: "NDR Niedersachsen", group: "Almanya bölgesel", url: "https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_nds/master.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png" },
+  { name: "WDR", group: "Almanya bölgesel", url: "https://wdr-live.ard-mcdn.de/wdr/live/hls/de/master.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png" },
+  { name: "BR", group: "Almanya bölgesel", url: "https://mcdn.br.de/br/fs/bfs_nord/hls/de/master.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_Bayerischer_Rundfunk_2024.svg/960px-Logo_Bayerischer_Rundfunk_2024.svg.png" },
+  { name: "hr", group: "Almanya bölgesel", url: "https://hrhls.akamaized.net/hls/live/2024525/hrhls/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/HR-Fernsehen_Logo_2023.svg/960px-HR-Fernsehen_Logo_2023.svg.png" },
+  { name: "MDR", group: "Almanya bölgesel", url: "https://mdrtvsnhls.akamaized.net/hls/live/2016928/mdrtvsn/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/MDR_Logo_2017.svg/960px-MDR_Logo_2017.svg.png" },
+  { name: "SWR", group: "Almanya bölgesel", url: "https://swrbwd-hls.akamaized.net/hls/live/2018672/swrbwd/master.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/SWR_Logo_2023.svg/960px-SWR_Logo_2023.svg.png" },
+  { name: "rbb", group: "Almanya bölgesel", url: "https://rbb-hls-berlin.akamaized.net/hls/live/2017824/rbb_berlin/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Rbb_Fernsehen_Logo_2017.08.svg/960px-Rbb_Fernsehen_Logo_2017.08.svg.png" },
+  { name: "Radio Bremen", group: "Almanya bölgesel", url: "https://rbhlslive.akamaized.net/hls/live/2020435/rbfs/master.m3u8", logo: "https://i.imgur.com/wsTOcuX.png" },
+  { name: "SR", group: "Almanya bölgesel", url: "https://srfs.akamaized.net/hls/live/689649/srfsgeo/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/SR_Fernsehen_Logo_2023.svg/960px-SR_Fernsehen_Logo_2023.svg.png" }
 ];
