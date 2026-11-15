@@ -1,6 +1,6 @@
 {
   "name": "tv-arayuz",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Samsung Tizen TV için minimal ana ekran (TizenBrew modülü)",
   "packageType": "app",
   "appName": "Ana Ekran",

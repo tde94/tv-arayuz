@@ -54,6 +54,30 @@
     return out;
   }
 
+  function episodeNo(title) {
+    var m = title.match(/(\d+)\s*\.?\s*b[öo]l[üu]m/i);
+    return m ? +m[1] : null;
+  }
+
+  // Kaynak listelerde bazı bölümler iki kez geçiyor ve sıra karışık olabiliyor:
+  // aynı adresi bir kez al, çoğu bölüm numaralıysa numaraya göre sırala
+  function tidyEpisodes(eps) {
+    var seen = {};
+    eps = eps.filter(function (e) {
+      if (seen[e.url]) return false;
+      seen[e.url] = true;
+      return true;
+    });
+    var numbered = eps.filter(function (e) { return episodeNo(e.title) !== null; }).length;
+    if (numbered < eps.length * 0.8) return eps;
+    return eps.map(function (e, i) { return { e: e, i: i, n: episodeNo(e.title) }; })
+      .sort(function (a, b) {
+        if (a.n === null || b.n === null) return a.i - b.i;
+        return a.n - b.n || a.i - b.i;
+      })
+      .map(function (x) { return x.e; });
+  }
+
   // Bölümleri dizilere böl; film kaynaklarında her film tek bölümlük bir "dizi"
   function groupShows(src, items) {
     var shows = [];
@@ -66,6 +90,7 @@
       }
       byName[key].eps.push(it);
     });
+    shows.forEach(function (s) { s.eps = tidyEpisodes(s.eps); });
     return shows;
   }
 
