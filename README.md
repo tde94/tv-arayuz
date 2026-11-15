@@ -26,3 +26,7 @@ Ayarlar `app/config.js` içinde.
 - `tunceli-08.jpg`: Munzur Gözeleri, kış. [Munzur Gözelerinde Kış.jpg](https://commons.wikimedia.org/wiki/File:Munzur_G%C3%B6zelerinde_K%C4%B1%C5%9F.jpg), Iskan21, CC BY-SA 4.0
 - `tunceli-09.jpg`: Pertek Kalesi. [Pertek Burg1.jpg](https://commons.wikimedia.org/wiki/File:Pertek_Burg1.jpg), Ingeborg Simon, CC BY-SA 4.0
 - `tunceli-10.jpg`: Munzur Vadisi. [Munzur Valley Travel.jpg](https://commons.wikimedia.org/wiki/File:Munzur_Valley_Travel.jpg), Mert Cem Taşkın, CC BY-SA 4.0
+
+## Diziler ve filmler
+
+Arşiv listeleri [UzunMuhalefet/Legal-IPTV](https://github.com/UzunMuhalefet/Legal-IPTV) projesinden okunur. Bağlantılar kanalların kendi sitelerinde ücretsiz yayınladığı bölümlere gider; içerik bu uygulama tarafından barındırılmaz.

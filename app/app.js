@@ -536,6 +536,10 @@
     if (appKey === 'youtube') {
       return { items: ytVideos.map(function (v) { return { video: v }; }), title: 'Türkiye\'de trend' };
     }
+    if (appKey === 'vod') {
+      var rec = window.VOD ? VOD.recent() : [];
+      return { items: rec.map(function (p, i) { return { vod: p, idx: i }; }), title: 'İzlemeye devam et' };
+    }
     if (appKey !== 'tv' && appKey !== 'tvde') return { items: [], title: '' };
     var de = appKey === 'tvde';
     var mine = function (i) { return isGerman(i) === de; };
@@ -549,6 +553,13 @@
   }
 
   function previewHtml(it) {
+    if (it.vod) {
+      var p = it.vod;
+      return '<button class="preview preview-video" data-vod="' + it.idx + '" data-title="' + escapeHtml(p.show + ', ' + p.title) + '">' +
+        '<span class="preview-face">' + (p.logo ? '<img src="' + escapeHtml(p.logo) + '" alt="">' : '') +
+        '<span class="preview-progress" style="width:' + Math.round(p.t / p.d * 100) + '%"></span></span>' +
+        '<span class="preview-name">' + escapeHtml(p.show) + '</span></button>';
+    }
     if (it.video) {
       var v = it.video;
       return '<button class="preview preview-video" data-video="' + escapeHtml(v.id) + '" data-title="' + escapeHtml(v.title) + '">' +
@@ -606,7 +617,7 @@
       document.documentElement.style.setProperty('--glow', dev.glow || '#3A4A6A');
     } else if (el.dataset.channel) {
       $('focus-title').textContent = CH[el.dataset.channel].name;
-    } else if (el.dataset.video) {
+    } else if (el.dataset.video || el.dataset.vod) {
       $('focus-title').textContent = el.dataset.title;
     } else if (el.dataset.app) {
       $('focus-title').textContent = C.apps[el.dataset.app].name;
@@ -641,6 +652,8 @@
     if (el.dataset.key) sendKey(el.dataset.key, el.textContent.trim());
     else if (el.dataset.channel) openTV(+el.dataset.channel);
     else if (el.dataset.video) openVideo(el.dataset.video);
+    else if (el.dataset.vod) VOD.playRecent(VOD.recent()[+el.dataset.vod]);
+    else if (el.dataset.app === 'vod') VOD.open();
     else if (el.dataset.app === 'tv') openTV(isGerman(tv.idx) ? lastOf(false) : undefined);
     else if (el.dataset.app === 'tvde') openTV(isGerman(tv.idx) ? undefined : lastOf(true));
     else if (el.dataset.app) launchApp(el.dataset.app);
@@ -651,6 +664,10 @@
   }
 
   document.addEventListener('keydown', function (e) {
+    if (window.VOD && VOD.isOpen()) {
+      if (VOD.key(e.keyCode)) e.preventDefault();
+      return;
+    }
     if (tv.open) {
       if (tvKey(e.keyCode)) e.preventDefault();
       return;
@@ -677,6 +694,9 @@
   });
 
   paintFocus();
+
+  // vod.js (arşiv) ana ekranla bu nesne üzerinden konuşur
+  window.APP = { refreshPreview: refreshPreview, toast: toast };
 
   // Önizlemede index.html#tv ile doğrudan Canlı TV açılır
   if (!isTV && location.hash === '#tv') openTV();

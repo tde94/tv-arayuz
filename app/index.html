@@ -69,6 +69,17 @@
               <span class="wm">Alman TV</span>
             </span>
           </button>
+          <button class="app" data-app="vod" data-glow="#B8461B">
+            <span class="face face-vod">
+              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
+                <g fill="none" stroke="#fff" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="8" y="22" width="48" height="32" rx="4"/>
+                  <path d="M8 22l44-12 3 9M20 19l6 7M34 15l6 7"/>
+                </g>
+              </svg>
+              <span class="wm">Diziler</span>
+            </span>
+          </button>
           <button class="app" data-app="prime" data-glow="#0B6FD6">
             <span class="face face-prime"><span class="wm wm-prime">prime video</span></span>
           </button>
@@ -127,6 +138,31 @@
     <p class="photo-credit" id="photo-credit"></p>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Diziler & Filmler arşivi -->
+    <section class="vod" id="vod" hidden>
+      <div class="vod-head">
+        <h1 class="vod-heading">Diziler ve filmler</h1>
+        <div class="vod-tabs" id="vod-tabs"></div>
+      </div>
+      <div class="vod-body" id="vod-body"></div>
+    </section>
+  </div>
+
+  <!-- Arşiv oynatıcısı -->
+  <div class="tv vod-player" id="vod-player" hidden>
+    <video id="vod-video" autoplay playsinline></video>
+    <div class="tv-status" id="vod-status"></div>
+    <div class="vod-osd" id="vod-osd">
+      <div class="vod-osd-show" id="vod-osd-show"></div>
+      <div class="vod-osd-title" id="vod-osd-title"></div>
+      <div class="vod-osd-track"><div class="vod-osd-bar" id="vod-osd-bar"></div></div>
+      <div class="vod-osd-row">
+        <span id="vod-osd-time"></span>
+        <span id="vod-osd-state"></span>
+        <span class="vod-osd-hint">OK duraklat · ◀ 10 sn · ▶ 30 sn · P+/P− bölüm</span>
+      </div>
+    </div>
   </div>
 
   <!-- Canlı TV: ana ekranın üstünde tam ekran oynatıcı -->
@@ -148,5 +184,6 @@
   <script src="channels.js"></script>
   <script src="vendor/hls.min.js"></script>
   <script src="app.js"></script>
+  <script src="vod.js"></script>
 </body>
 </html>
