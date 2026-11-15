@@ -28,7 +28,7 @@ window.CONFIG = {
   photoMinutes: 30,
 
   // Paneller buzlu cam gibi bulanık olsun mu? TV kasarsa false yap.
-  blur: true,
+  blur: false,
 
   // TV'deki uygulama kimlikleri. Bulunamazsa isimden aranır.
   apps: {

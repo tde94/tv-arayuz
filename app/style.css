@@ -71,10 +71,8 @@ html, body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-color: var(--glow);
-  transition: background-color 0.7s var(--ease);
-  -webkit-mask-image: radial-gradient(1000px 700px at 30% 36%, #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
-  mask-image: radial-gradient(1000px 700px at 30% 36%, #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
+  /* Maske ve renk animasyonu TV'de yavaş; düz gradyan tek seferde çizilir */
+  background: radial-gradient(1000px 700px at 30% 36%, var(--glow) 0%, transparent 72%);
 }
 
 .has-photo .glow { opacity: 0.45; }
@@ -218,7 +216,8 @@ button {
 .track {
   display: flex;
   gap: 22px;
-  transition: transform 0.45s var(--ease);
+  transition: transform 0.3s var(--ease);
+  will-change: transform;
 }
 
 .app { flex: none; }
@@ -234,7 +233,8 @@ button {
   border-radius: 24px;
   overflow: hidden;
   color: #fff;
-  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  transition: transform 0.2s var(--ease);
+  will-change: transform;
 }
 
 .wm {
@@ -318,9 +318,7 @@ button {
 /* Odak: beyaz çerçeve ve hafif büyüme */
 .app.focused .face {
   transform: scale(1.07);
-  box-shadow:
-    0 0 0 5px #FFFFFF,
-    0 24px 48px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 5px #FFFFFF;
 }
 
 /* 7 günlük hava durumu: sağ üstte, butonların altında */
