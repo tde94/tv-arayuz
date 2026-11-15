@@ -450,33 +450,83 @@
   var CARD_STEP = 316 + 22;
   var VISIBLE = 4;
 
-  // Kartın altındaki önizleme satırı (şimdilik Canlı TV'nin son izlenen kanalları)
+  /* ---------- YouTube: Türkiye'de trend olan videolar ---------- */
+  var YT_KEY = (window.SECRETS && window.SECRETS.youtubeApiKey) || '';
+  var ytVideos = [];
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function loadYoutube() {
+    if (!YT_KEY) return;
+    fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=TR&maxResults=8&key=' + YT_KEY)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        ytVideos = (j.items || []).map(function (v) {
+          return { id: v.id, title: v.snippet.title, channel: v.snippet.channelTitle };
+        });
+        // YouTube kartı seçiliyse satırı hemen güncelle
+        if (previewFor === 'youtube') refreshPreview();
+      })
+      .catch(function () {});
+  }
+  loadYoutube();
+  setInterval(loadYoutube, 30 * 60 * 1000);
+
+  // Videoyu YouTube uygulamasında açar; olmazsa YouTube'u normal açar
+  function openVideo(id) {
+    if (!window.tizen) return toast('Video YouTube\'da açılıyor (önizleme)');
+    try {
+      var data = [new tizen.ApplicationControlData('PAYLOAD', ['{"values": "v=' + id + '"}'])];
+      var ctrl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, data);
+      tizen.application.launchAppControl(ctrl, C.apps.youtube.ids[0], null, function () { launchApp('youtube'); });
+    } catch (e) {
+      launchApp('youtube');
+    }
+  }
+
+  /* ---------- Kart önizleme satırı ---------- */
   var preview = [];
   var previewFor = null;
 
-  // Canlı TV: favoriler varsa onlar, yoksa son izlenenler
+  // Canlı TV: favoriler, yoksa son izlenenler. YouTube: trend videolar.
   function previewItems(appKey) {
+    if (appKey === 'youtube') {
+      return { items: ytVideos.map(function (v) { return { video: v }; }), title: 'Türkiye\'de trend' };
+    }
     if (appKey !== 'tv') return { items: [], title: '' };
     var favs = getFavs();
-    return favs.length
-      ? { items: favs.slice(0, 8), title: 'Favori kanalların' }
-      : { items: getRecent(), title: 'Son izlediğin kanallar' };
+    var list = favs.length ? favs.slice(0, 8) : getRecent();
+    return {
+      items: list.map(function (i) { return { channel: i }; }),
+      title: favs.length ? 'Favori kanalların' : 'Son izlediğin kanallar'
+    };
+  }
+
+  function previewHtml(it) {
+    if (it.video) {
+      var v = it.video;
+      return '<button class="preview preview-video" data-video="' + escapeHtml(v.id) + '" data-title="' + escapeHtml(v.title) + '">' +
+        '<span class="preview-face"><img src="https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/mqdefault.jpg" alt=""></span>' +
+        '<span class="preview-name">' + escapeHtml(v.title) + '</span></button>';
+    }
+    var ch = CH[it.channel];
+    return '<button class="preview" data-channel="' + it.channel + '">' +
+      '<span class="preview-face"><span class="preview-text">' + ch.name + '</span>' +
+      (ch.logo ? '<img src="' + ch.logo + '" alt="" onerror="this.parentNode.removeChild(this)">' : '') + '</span>' +
+      '<span class="preview-name">' + ch.name + '</span></button>';
   }
 
   function renderPreview(appKey) {
     if (appKey === previewFor) return;
     previewFor = appKey;
     var p = previewItems(appKey);
-    var items = p.items;
     $('previews-title').textContent = p.title;
-    $('previews').innerHTML = items.map(function (i) {
-      var ch = CH[i];
-      return '<button class="preview" data-channel="' + i + '">' +
-        '<span class="preview-face"><span class="preview-text">' + ch.name + '</span>' +
-        (ch.logo ? '<img src="' + ch.logo + '" alt="" onerror="this.parentNode.removeChild(this)">' : '') + '</span>' +
-        '<span class="preview-name">' + ch.name + '</span></button>';
-    }).join('');
-    $('previews-row').hidden = !items.length;
+    $('previews').innerHTML = p.items.map(previewHtml).join('');
+    $('previews-row').hidden = !p.items.length;
     preview = [].slice.call(document.querySelectorAll('.preview'));
   }
 
@@ -514,6 +564,8 @@
       document.documentElement.style.setProperty('--glow', dev.glow || '#3A4A6A');
     } else if (el.dataset.channel) {
       $('focus-title').textContent = CH[el.dataset.channel].name;
+    } else if (el.dataset.video) {
+      $('focus-title').textContent = el.dataset.title;
     } else if (el.dataset.app) {
       $('focus-title').textContent = C.apps[el.dataset.app].name;
       document.documentElement.style.setProperty('--glow', el.dataset.glow);
@@ -546,6 +598,7 @@
     var el = grid[pos.row][pos.col];
     if (el.dataset.key) sendKey(el.dataset.key, el.textContent.trim());
     else if (el.dataset.channel) openTV(+el.dataset.channel);
+    else if (el.dataset.video) openVideo(el.dataset.video);
     else if (el.dataset.app === 'tv') openTV();
     else if (el.dataset.app) launchApp(el.dataset.app);
     else if (el.dataset.device) {
