@@ -24,8 +24,32 @@
     return 'İyi geceler';
   }
 
+  // "<isimler> 1 ay 18 günlük oldular." (bilgi gizli dosyada; yoksa gösterilmez)
+  var MS = window.SECRETS && window.SECRETS.milestone;
+  function milestone(d) {
+    if (!MS) return;
+    var p = MS.born.split('-');
+    var y = d.getFullYear() - p[0];
+    var m = d.getMonth() + 1 - p[1];
+    var day = d.getDate() - p[2];
+    if (day < 0) { m--; day += new Date(d.getFullYear(), d.getMonth(), 0).getDate(); }
+    if (m < 0) { y--; m += 12; }
+    if (y < 0) return;
+    // Son birim ekini alır: "1 ay 18 günlük", "2 aylık", "1 yaşında", "1 yaş 3 aylık"
+    var parts = [];
+    if (y) parts.push([y, 'yaş', 'yaşında']);
+    if (m) parts.push([m, 'ay', 'aylık']);
+    if (day || !parts.length) parts.push([day, 'gün', 'günlük']);
+    var text = parts.map(function (u, i) {
+      return u[0] + ' ' + (i === parts.length - 1 ? u[2] : u[1]);
+    }).join(' ');
+    $('milestone').textContent = MS.names + ' ' + text + ' oldular.';
+    $('milestone').hidden = false;
+  }
+
   function tick() {
     var d = new Date();
+    milestone(d);
     $('greeting').textContent = greeting(d.getHours()) + (C.userName ? ', ' + C.userName : '');
     $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
     $('date').textContent = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });

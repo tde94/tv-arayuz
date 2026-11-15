@@ -669,3 +669,14 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Sağ üstteki "… günlük oldular" yazısı */
+.pills { align-items: center; }
+.milestone {
+  margin-right: 10px;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+}
+.milestone[hidden] { display: none; }
+.has-photo .milestone { text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6); }
