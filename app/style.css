@@ -421,3 +421,19 @@ button {
 .has-photo .today-summary,
 .has-photo .greeting,
 .has-photo .date { color: rgba(244, 245, 248, 0.88); }
+
+/* ---------- TV performansı ----------
+   Zayıf TV işlemcisinde her animasyon takılıyordu: geçişler anında,
+   odak sadece beyaz çerçeve, fotoğraf varken tam ekran renk ışığı yok. */
+*, *::before, *::after {
+  transition: none !important;
+  will-change: auto !important;
+}
+
+.app.focused .face,
+.pill.focused,
+.device.focused {
+  transform: none;
+}
+
+.has-photo .glow { display: none; }
