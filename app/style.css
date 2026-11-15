@@ -560,3 +560,71 @@ button {
 .wm-tod { font-size: 50px; font-weight: 700; letter-spacing: 0.02em; }
 
 .tv-item-num { width: 64px; white-space: nowrap; }
+
+/* ---------- Kart önizlemesi (son izlenen kanallar) ---------- */
+.previews-row { margin-top: 26px; }
+.previews-row[hidden] { display: none; }
+
+.previews-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.previews {
+  display: flex;
+  gap: 18px;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+.preview-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 112px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #EDEEF1;
+}
+
+.preview-face img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.preview-name {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview.focused .preview-face { box-shadow: 0 0 0 4px #FFFFFF; }
+.preview.focused .preview-name { color: var(--text); }
+
+/* Logo yüklenmezse altındaki kanal adı görünür */
+.preview-face { position: relative; }
+.preview-face img {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  background: #EDEEF1;
+}
+.preview-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0A0C12;
+  text-align: center;
+}

@@ -238,9 +238,26 @@
     });
   }
 
+  // Son izlenen kanallar (isimle saklanır; liste güncellense de bozulmaz)
+  var RECENT_MAX = 6;
+  function getRecent() {
+    var names = [];
+    try { names = JSON.parse(localStorage.getItem('tvRecent') || '[]'); } catch (e) {}
+    return names.map(function (n) {
+      for (var i = 0; i < CH.length; i++) if (CH[i].name === n) return i;
+      return -1;
+    }).filter(function (i) { return i >= 0; });
+  }
+  function addRecent(i) {
+    var names = getRecent().map(function (j) { return CH[j].name; })
+      .filter(function (n) { return n !== CH[i].name; });
+    names.unshift(CH[i].name);
+    try { localStorage.setItem('tvRecent', JSON.stringify(names.slice(0, RECENT_MAX))); } catch (e) {}
+  }
+
   var video = $('tv-video');
   var status = function (s) { $('tv-status').textContent = s; };
-  video.addEventListener('playing', function () { clearTimeout(tv.stallTimer); status(''); });
+  video.addEventListener('playing', function () { clearTimeout(tv.stallTimer); status(''); addRecent(tv.idx); });
   video.addEventListener('waiting', function () { status('Yükleniyor…'); });
   video.addEventListener('error', function () {
     // hls.js zaten denendiyse ve TV'nin kendi oynatıcısı da açamadıysa vazgeç
@@ -349,8 +366,9 @@
     if (open) { tv.listIdx = tv.idx; renderList(); }
   }
 
-  function openTV() {
+  function openTV(idx) {
     if (!CH.length) return toast('Kanal listesi boş');
+    if (typeof idx === 'number') tv.idx = idx;
     tv.open = true;
     $('tv').hidden = false;
     $('stage').style.display = 'none';
@@ -363,6 +381,7 @@
     stopVideo();
     $('tv').hidden = true;
     $('stage').style.display = '';
+    refreshPreview(); // son izlenenler güncellensin
   }
 
   function typeDigit(d) {
@@ -403,13 +422,57 @@
   var apps = [].slice.call(document.querySelectorAll('.app'));
   var devices = [].slice.call(document.querySelectorAll('.device'));
   // Boş satırlar (buton ya da cihaz yoksa) gezinmeye katılmaz
-  var grid = [pills, apps, devices].filter(function (r) { return r.length; });
-  var pos = { row: grid.indexOf(apps), col: 0 };
-  var lastCol = grid.map(function () { return 0; });
   var CARD_STEP = 316 + 22;
   var VISIBLE = 4;
 
+  // Kartın altındaki önizleme satırı (şimdilik Canlı TV'nin son izlenen kanalları)
+  var preview = [];
+  var previewFor = null;
+
+  function previewItems(appKey) {
+    if (appKey === 'tv') return getRecent();
+    return [];
+  }
+
+  function renderPreview(appKey) {
+    if (appKey === previewFor) return;
+    previewFor = appKey;
+    var items = previewItems(appKey);
+    $('previews').innerHTML = items.map(function (i) {
+      var ch = CH[i];
+      return '<button class="preview" data-channel="' + i + '">' +
+        '<span class="preview-face"><span class="preview-text">' + ch.name + '</span>' +
+        (ch.logo ? '<img src="' + ch.logo + '" alt="" onerror="this.parentNode.removeChild(this)">' : '') + '</span>' +
+        '<span class="preview-name">' + ch.name + '</span></button>';
+    }).join('');
+    $('previews-row').hidden = !items.length;
+    preview = [].slice.call(document.querySelectorAll('.preview'));
+  }
+
+  // Satırlar isimle tutulur; boş satırlar gezinmeye katılmaz
+  var ROWS = { pills: pills, apps: apps, preview: function () { return preview; }, devices: devices };
+  var grid = [];
+  var gridNames = [];
+  function buildGrid() {
+    gridNames = ['pills', 'apps', 'preview', 'devices'].filter(function (n) { return rowOf(n).length; });
+    grid = gridNames.map(rowOf);
+  }
+  function rowOf(n) { return typeof ROWS[n] === 'function' ? ROWS[n]() : ROWS[n]; }
+
+  var lastCol = { pills: 0, apps: 0, preview: 0, devices: 0 };
+  buildGrid();
+  var pos = { row: gridNames.indexOf('apps'), col: 0 };
+
   function paintFocus() {
+    // Önizleme, son odaklanılan uygulama kartına göre çizilir
+    var onApps = gridNames[pos.row] === 'apps';
+    var focusedApp = apps[onApps ? pos.col : lastCol.apps];
+    renderPreview(focusedApp.dataset.app);
+    var rowName = gridNames[pos.row];
+    buildGrid();
+    pos.row = Math.max(0, gridNames.indexOf(rowName));
+    pos.col = Math.min(pos.col, grid[pos.row].length - 1);
+
     [].forEach.call(document.querySelectorAll('.focused'), function (el) { el.classList.remove('focused'); });
     var el = grid[pos.row][pos.col];
     el.classList.add('focused');
@@ -418,6 +481,8 @@
       var dev = C.devices[el.dataset.device];
       $('focus-title').textContent = dev.name;
       document.documentElement.style.setProperty('--glow', dev.glow || '#3A4A6A');
+    } else if (el.dataset.channel) {
+      $('focus-title').textContent = CH[el.dataset.channel].name;
     } else if (el.dataset.app) {
       $('focus-title').textContent = C.apps[el.dataset.app].name;
       document.documentElement.style.setProperty('--glow', el.dataset.glow);
@@ -427,15 +492,21 @@
     }
   }
 
+  // Canlı TV'den dönünce son izlenenler yeniden çizilsin
+  function refreshPreview() {
+    previewFor = null;
+    paintFocus();
+  }
+
   function move(dRow, dCol) {
     if (dCol) {
       pos.col = Math.max(0, Math.min(grid[pos.row].length - 1, pos.col + dCol));
     } else {
       var next = pos.row + dRow;
       if (next < 0 || next >= grid.length) return;
-      lastCol[pos.row] = pos.col;
+      lastCol[gridNames[pos.row]] = pos.col;
       pos.row = next;
-      pos.col = Math.min(lastCol[next], grid[next].length - 1);
+      pos.col = Math.min(lastCol[gridNames[next]], grid[next].length - 1);
     }
     paintFocus();
   }
@@ -443,6 +514,7 @@
   function activate() {
     var el = grid[pos.row][pos.col];
     if (el.dataset.key) sendKey(el.dataset.key, el.textContent.trim());
+    else if (el.dataset.channel) openTV(+el.dataset.channel);
     else if (el.dataset.app === 'tv') openTV();
     else if (el.dataset.app) launchApp(el.dataset.app);
     else if (el.dataset.device) {
@@ -469,7 +541,7 @@
 
   // Önizlemede fareyle de kullanılabilsin
   document.addEventListener('click', function (e) {
-    var el = e.target.closest('.app, .pill, .device');
+    var el = e.target.closest('.app, .pill, .device, .preview');
     if (!el) return;
     for (var r = 0; r < grid.length; r++) {
       var c = grid[r].indexOf(el);
