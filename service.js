@@ -2,8 +2,10 @@
 // TizenBrew modülünün servis dosyası olarak ya da bağımsız uygulamanın Tizen servisi olarak.
 // - /launch?ids=…&name=… → uygulama açar
 // - /key?k=KEY_HDMI1     → TV'ye uzaktan kumanda tuşu gönderir (HDMI, kaynak, ayarlar)
+// - /hls?u=…             → canlı yayın aracısı (CORS izni vermeyen kanallar için)
 // Eski Node sürümleriyle uyumlu kalması için ES5 yazıldı.
 var http = require('http');
+var https = require('https');
 var tls = require('tls');
 var crypto = require('crypto');
 var urlLib = require('url');
@@ -18,6 +20,57 @@ function send(res, code, obj) {
     'Access-Control-Allow-Origin': '*'
   });
   res.end(JSON.stringify(obj));
+}
+
+/* ---------- Canlı yayın aracısı ---------- */
+// Bazı kanallar tarayıcıya CORS izni vermiyor; oynatıcı yayını buradan çeker.
+// Oynatma listelerindeki adresler yine bu aracıya yönlendirilir.
+function proxyUrl(u) { return 'http://127.0.0.1:' + PORT + '/hls?u=' + encodeURIComponent(u); }
+
+function rewritePlaylist(text, base) {
+  return text.split('\n').map(function (line) {
+    var l = line.trim();
+    if (!l) return line;
+    if (l.charAt(0) === '#') {
+      // #EXT-X-KEY, #EXT-X-MEDIA gibi satırlardaki URI="…" değerleri
+      return line.replace(/URI="([^"]+)"/g, function (m, u) { return 'URI="' + proxyUrl(urlLib.resolve(base, u)) + '"'; });
+    }
+    return proxyUrl(urlLib.resolve(base, l));
+  }).join('\n');
+}
+
+function fetchUpstream(target, redirects, cb) {
+  var o = urlLib.parse(target);
+  o.headers = { 'User-Agent': 'Mozilla/5.0 (SMART-TV; Linux; Tizen 7.0)' };
+  var lib = o.protocol === 'http:' ? http : https;
+  lib.get(o, function (r) {
+    if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location && redirects < 5) {
+      r.resume();
+      return fetchUpstream(urlLib.resolve(target, r.headers.location), redirects + 1, cb);
+    }
+    cb(null, r, target);
+  }).on('error', cb);
+}
+
+function handleHls(q, res) {
+  var target = q.u || '';
+  if (!/^https?:\/\//.test(target)) return send(res, 400, { error: 'url' });
+  fetchUpstream(target, 0, function (err, up, finalUrl) {
+    if (err) return send(res, 502, { error: err.message });
+    var type = up.headers['content-type'] || '';
+    var isPlaylist = /mpegurl/i.test(type) || /\.m3u8(\?|$)/i.test(urlLib.parse(finalUrl).pathname || '');
+    if (!isPlaylist) {
+      res.writeHead(up.statusCode, { 'Content-Type': type || 'video/mp2t', 'Access-Control-Allow-Origin': '*' });
+      return up.pipe(res);
+    }
+    var body = '';
+    up.setEncoding('utf8');
+    up.on('data', function (c) { body += c; });
+    up.on('end', function () {
+      res.writeHead(up.statusCode, { 'Content-Type': 'application/vnd.apple.mpegurl', 'Access-Control-Allow-Origin': '*' });
+      res.end(rewritePlaylist(body, finalUrl));
+    });
+  });
 }
 
 /* ---------- Samsung uzaktan kumanda (WebSocket, port 8002) ---------- */
@@ -165,6 +218,7 @@ function handleLaunch(q, res) {
 /* ---------- Sunucu ---------- */
 var server = http.createServer(function (req, res) {
   var u = urlLib.parse(req.url, true);
+  if (u.pathname === '/hls') return handleHls(u.query, res);
   if (u.pathname === '/launch') return handleLaunch(u.query, res);
   if (u.pathname === '/key') return handleKey(u.query, res);
   if (u.pathname === '/ping') return send(res, 200, { ok: true });

@@ -266,7 +266,28 @@
     }, 20000);
   }
 
-  // Önce hls.js (Samsung TV'nin <video> etiketi HLS'yi kendi başına açmıyor)
+  // hls.js ile oynat; olmazsa bir sonraki yönteme geç
+  function playHls(ch, url, next) {
+    if (tv.hls) { tv.hls.destroy(); tv.hls = null; }
+    clearTimeout(tv.stallTimer);
+    tv.mode = 'hls';
+    var done = false;
+    var fail = function () {
+      if (done || CH[tv.idx] !== ch) return;
+      done = true;
+      next();
+    };
+    tv.hls = new Hls({ maxBufferLength: 20 });
+    tv.hls.on(Hls.Events.MANIFEST_PARSED, function () { video.play().catch(function () {}); });
+    tv.hls.on(Hls.Events.ERROR, function (ev, data) { if (data.fatal) fail(); });
+    tv.hls.loadSource(url);
+    tv.hls.attachMedia(video);
+    // 10 sn'de görüntü gelmezse sıradaki yönteme geç
+    tv.stallTimer = setTimeout(function () { if (video.readyState < 3) fail(); }, 10000);
+  }
+
+  // Sıra: doğrudan hls.js → TV'deki servis aracılığıyla hls.js (CORS izni olmayan
+  // kanallar) → TV'nin kendi oynatıcısı
   function play(i) {
     tv.idx = (i + CH.length) % CH.length;
     var ch = CH[tv.idx];
@@ -274,20 +295,13 @@
     stopVideo();
     status('Yükleniyor…');
     if (window.Hls && Hls.isSupported()) {
-      tv.mode = 'hls';
-      tv.hls = new Hls({ maxBufferLength: 20 });
-      tv.hls.on(Hls.Events.MANIFEST_PARSED, function () { video.play().catch(function () {}); });
-      tv.hls.on(Hls.Events.ERROR, function (ev, data) {
-        if (!data.fatal || CH[tv.idx] !== ch) return;
-        status('Yükleniyor… (yedek oynatıcı)');
-        playNative(ch);
+      playHls(ch, ch.url, function () {
+        status('Yükleniyor… (2. deneme)');
+        playHls(ch, C.serviceUrl + '/hls?u=' + encodeURIComponent(ch.url), function () {
+          status('Yükleniyor… (3. deneme)');
+          playNative(ch);
+        });
       });
-      tv.hls.loadSource(ch.url);
-      tv.hls.attachMedia(video);
-      // 15 sn'de görüntü gelmezse yedek oynatıcıya geç
-      tv.stallTimer = setTimeout(function () {
-        if (CH[tv.idx] === ch && video.readyState < 3) playNative(ch);
-      }, 15000);
     } else {
       playNative(ch);
     }
