@@ -1,9 +1,7 @@
 // TizenBrew servis dosyası: TV üzerinde Node.js ile çalışır.
-// - /rss?channel=UC...  → kanalın son videoları (JSON)
-// - /key?k=KEY_HDMI1    → TV'ye uzaktan kumanda tuşu gönderir (HDMI geçişi için)
+// - /key?k=KEY_HDMI1 → TV'ye uzaktan kumanda tuşu gönderir (HDMI, kaynak, ayarlar)
 // Eski Node sürümleriyle uyumlu kalması için ES5 yazıldı.
 var http = require('http');
-var https = require('https');
 var tls = require('tls');
 var crypto = require('crypto');
 var urlLib = require('url');
@@ -18,75 +16,6 @@ function send(res, code, obj) {
     'Access-Control-Allow-Origin': '*'
   });
   res.end(JSON.stringify(obj));
-}
-
-/* ---------- YouTube RSS ---------- */
-var rssCache = {};
-
-function getText(target, cb) {
-  var o = urlLib.parse(target);
-  o.headers = { 'User-Agent': 'Mozilla/5.0' };
-  https.get(o, function (r) {
-    var d = '';
-    r.setEncoding('utf8');
-    r.on('data', function (c) { d += c; });
-    r.on('end', function () { cb(r.statusCode === 200 ? null : new Error('HTTP ' + r.statusCode), d); });
-  }).on('error', cb);
-}
-
-function decodeXml(s) {
-  return s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-}
-
-function parseFeed(xml) {
-  var channel = (xml.match(/<author>\s*<name>([^<]*)<\/name>/) || [])[1] || '';
-  var out = [];
-  var entries = xml.split('<entry>').slice(1);
-  for (var i = 0; i < entries.length; i++) {
-    var e = entries[i];
-    var id = (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1];
-    // Shorts'ları atla
-    if (!id || /\/shorts\//.test(e)) continue;
-    out.push({
-      id: id,
-      title: decodeXml((e.match(/<title>([^<]*)<\/title>/) || [])[1] || ''),
-      published: (e.match(/<published>([^<]+)<\/published>/) || [])[1] || '',
-      channel: decodeXml(channel)
-    });
-  }
-  return out;
-}
-
-function parseApi(j) {
-  return (j.items || []).map(function (it) {
-    var sn = it.snippet;
-    return { id: sn.resourceId.videoId, title: sn.title, published: sn.publishedAt, channel: sn.channelTitle };
-  }).filter(function (v) { return v.title !== 'Private video' && v.title !== 'Deleted video'; });
-}
-
-function handleRss(q, res) {
-  var ch = q.channel || '';
-  if (!/^UC[\w-]{22}$/.test(ch)) return send(res, 400, { error: 'channel' });
-  var hit = rssCache[ch];
-  if (hit && Date.now() - hit.at < 15 * 60 * 1000) return send(res, 200, hit.data);
-  var done = function (data) {
-    rssCache[ch] = { at: Date.now(), data: data };
-    send(res, 200, data);
-  };
-  var fail = function () { send(res, hit ? 200 : 502, hit ? hit.data : []); };
-  // API anahtarı varsa YouTube Data API (kanalın "yüklenenler" listesi), yoksa RSS
-  if (q.key) {
-    var api = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=UU' +
-      ch.slice(2) + '&key=' + encodeURIComponent(q.key);
-    return getText(api, function (err, body) {
-      if (err) return fail();
-      try { done(parseApi(JSON.parse(body))); } catch (e) { fail(); }
-    });
-  }
-  getText('https://www.youtube.com/feeds/videos.xml?channel_id=' + ch, function (err, xml) {
-    if (err) return fail();
-    done(parseFeed(xml));
-  });
 }
 
 /* ---------- Samsung uzaktan kumanda (WebSocket, port 8002) ---------- */
@@ -185,7 +114,6 @@ function handleKey(q, res) {
 /* ---------- Sunucu ---------- */
 http.createServer(function (req, res) {
   var u = urlLib.parse(req.url, true);
-  if (u.pathname === '/rss') return handleRss(u.query, res);
   if (u.pathname === '/key') return handleKey(u.query, res);
   if (u.pathname === '/ping') return send(res, 200, { ok: true });
   send(res, 404, { error: 'not found' });

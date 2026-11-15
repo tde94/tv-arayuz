@@ -6,81 +6,71 @@
   <title>Ana Ekran</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="stage">
-    <div class="sky" id="sky"></div>
+    <div class="glow" id="glow"></div>
 
     <header class="top">
       <div class="time-block">
-        <div class="clock" id="clock">--:--</div>
-        <div class="date" id="date"></div>
-      </div>
-      <div class="weather" id="weather" hidden>
-        <div class="weather-icon" id="weather-icon"></div>
-        <div class="weather-text">
-          <div class="weather-temp" id="weather-temp"></div>
-          <div class="weather-desc" id="weather-desc"></div>
+        <div class="greeting" id="greeting"></div>
+        <div class="time-line">
+          <span class="clock" id="clock">--:--</span>
+          <span class="divider"></span>
+          <span class="date" id="date"></span>
         </div>
       </div>
+
+      <nav class="pills" id="pills">
+        <button class="pill" data-key="KEY_SOURCE">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v5M16 3v5M6 8h12v4a6 6 0 0 1-12 0zM12 18v3"/></svg>
+          <span>Kaynaklar</span>
+        </button>
+        <div class="pill pill-static" id="weather" hidden>
+          <span id="weather-icon"></span>
+          <span id="weather-text"></span>
+        </div>
+        <button class="pill" data-key="KEY_MENU">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+          <span>Ayarlar</span>
+        </button>
+      </nav>
     </header>
 
-    <main class="rows">
-      <section class="row videos-row" id="videos-row" hidden>
-        <h2 class="row-title">Kanallarından yeni</h2>
-        <div class="videos" id="videos"></div>
-      </section>
-
-      <section class="row apps-row">
-        <div class="apps apps-main">
-          <button class="app app-netflix" data-action="netflix">
-            <span class="app-face">
-              <svg viewBox="0 0 120 200" class="netflix-n" aria-hidden="true">
-                <path d="M0 0h34l52 150V0h34v200H86L34 52v148H0z" fill="#E50914"/>
-                <path d="M34 0 86 150v50L34 52z" fill="#B1060F"/>
-              </svg>
-            </span>
-            <span class="app-name">Netflix</span>
+    <main class="shelf">
+      <h1 class="focus-title" id="focus-title">Netflix</h1>
+      <div class="tray">
+        <div class="track" id="track">
+          <button class="app" data-app="netflix" data-glow="#C4121A">
+            <span class="face face-netflix"><span class="wm-netflix">NETFLIX</span></span>
           </button>
-          <button class="app app-youtube" data-action="youtube">
-            <span class="app-face">
-              <svg viewBox="0 0 160 112" class="yt-mark" aria-hidden="true">
-                <rect width="160" height="112" rx="30" fill="#FF0033"/>
-                <path d="M64 32v48l42-24z" fill="#fff"/>
-              </svg>
+          <button class="app" data-app="youtube" data-glow="#C8102E">
+            <span class="face face-youtube">
+              <svg viewBox="0 0 40 28" class="yt-play" aria-hidden="true"><rect width="40" height="28" rx="8" fill="#FF0033"/><path d="M16 8v12l10-6z" fill="#fff"/></svg>
+              <span class="wm">YouTube</span>
             </span>
-            <span class="app-name">YouTube</span>
           </button>
-          <button class="app app-playstation" data-action="playstation">
-            <span class="app-face">
-              <svg viewBox="0 0 64 64" class="ps-mark" aria-hidden="true">
-                <g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+          <button class="app" data-app="playstation" data-glow="#0A5BC4">
+            <span class="face face-ps">
+              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
+                <g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 24h22c7 0 11 6 12.5 13l2 9.5c.8 4-3.8 6.5-6.8 3.6L44 43H20l-6.7 7.1c-3 2.9-7.6.4-6.8-3.6l2-9.5C10 30 14 24 21 24z"/>
                   <path d="M20 31v8M16 35h8"/>
                 </g>
-                <circle cx="42" cy="32" r="2.2" fill="#fff"/>
-                <circle cx="47" cy="37" r="2.2" fill="#fff"/>
               </svg>
+              <span class="wm">PlayStation</span>
             </span>
-            <span class="app-name">PlayStation</span>
           </button>
-        </div>
-      </section>
-
-      <section class="row more-row">
-        <div class="apps apps-more">
-          <button class="app app-small app-prime" data-app="prime">
-            <span class="app-face"><span class="wordmark">prime video</span></span>
-            <span class="app-name">Prime Video</span>
+          <button class="app" data-app="prime" data-glow="#0B6FD6">
+            <span class="face face-prime"><span class="wm wm-prime">prime video</span></span>
           </button>
-          <button class="app app-small app-disney" data-app="disney">
-            <span class="app-face"><span class="wordmark">Disney+</span></span>
-            <span class="app-name">Disney+</span>
+          <button class="app" data-app="disney" data-glow="#1B3E9A">
+            <span class="face face-disney"><span class="wm wm-disney">Disney+</span></span>
           </button>
-          <button class="app app-small app-spotify" data-app="spotify">
-            <span class="app-face">
+          <button class="app" data-app="spotify" data-glow="#14833F">
+            <span class="face face-spotify">
               <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
                 <circle cx="32" cy="32" r="28" fill="#1ED760"/>
                 <g fill="none" stroke="#000" stroke-linecap="round">
@@ -89,34 +79,31 @@
                   <path d="M21 41.5c6.5-2 13.5-1.4 19 1.4" stroke-width="2.8"/>
                 </g>
               </svg>
+              <span class="wm">Spotify</span>
             </span>
-            <span class="app-name">Spotify</span>
           </button>
-          <button class="app app-small app-browser" data-app="browser">
-            <span class="app-face">
+          <button class="app" data-app="browser" data-glow="#5A3FD0">
+            <span class="face face-browser">
               <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
-                <g fill="none" stroke="#fff" stroke-width="2.6">
-                  <circle cx="32" cy="32" r="24"/>
-                  <ellipse cx="32" cy="32" rx="10" ry="24"/>
-                  <path d="M8 32h48M12 20h40M12 44h40"/>
+                <g fill="none" stroke="#fff" stroke-width="3">
+                  <circle cx="32" cy="32" r="24"/><ellipse cx="32" cy="32" rx="10" ry="24"/><path d="M8 32h48M12 20h40M12 44h40"/>
                 </g>
               </svg>
+              <span class="wm">Internet</span>
             </span>
-            <span class="app-name">Internet</span>
           </button>
-          <button class="app app-small app-smartthings" data-app="smartthings">
-            <span class="app-face">
+          <button class="app" data-app="smartthings" data-glow="#0E8F8C">
+            <span class="face face-st">
               <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
-                <g fill="none" stroke="#fff" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round">
-                  <path d="M12 30 32 13l20 17v21H12z"/>
-                  <circle cx="32" cy="37" r="6"/>
+                <g fill="none" stroke="#fff" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+                  <path d="M12 30 32 13l20 17v21H12z"/><circle cx="32" cy="37" r="6"/>
                 </g>
               </svg>
+              <span class="wm">SmartThings</span>
             </span>
-            <span class="app-name">SmartThings</span>
           </button>
         </div>
-      </section>
+      </div>
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
