@@ -136,7 +136,7 @@ button {
   position: absolute;
   left: 96px;
   right: 0;
-  top: 470px;
+  top: 400px;
 }
 
 .focus-title {
@@ -209,11 +209,64 @@ button {
     0 24px 48px rgba(0, 0, 0, 0.5);
 }
 
+/* 7 günlük hava durumu */
+.forecast {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  bottom: 64px;
+  display: flex;
+  gap: 12px;
+}
+
+.forecast[hidden] { display: none; }
+
+.day {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.day-today { background: rgba(255, 255, 255, 0.11); }
+
+.day svg {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.day-name {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.day-temp {
+  margin-top: 2px;
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-temp span {
+  font-weight: 500;
+  color: var(--muted);
+}
+
 .toast {
   position: absolute;
   left: 50%;
-  bottom: 72px;
-  transform: translate(-50%, 20px);
+  top: 64px;
+  transform: translate(-50%, -20px);
   padding: 18px 34px;
   border-radius: 999px;
   background: rgba(20, 22, 30, 0.9);

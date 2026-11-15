@@ -73,15 +73,33 @@
     return 'cloudy';
   }
 
+  function renderForecast(daily) {
+    $('forecast').innerHTML = daily.time.map(function (day, i) {
+      // "2026-11-15" → yerel tarih (UTC kaymasın diye öğlen saatiyle)
+      var d = new Date(day + 'T12:00:00');
+      var name = i === 0 ? 'Bugün' : d.toLocaleDateString('tr-TR', { weekday: 'short' });
+      var kind = weatherKind(daily.weather_code[i]);
+      return '<div class="day' + (i === 0 ? ' day-today' : '') + '">' +
+        '<svg viewBox="0 0 24 24">' + ICONS[kind](false) + '</svg>' +
+        '<div><div class="day-name">' + name + '</div>' +
+        '<div class="day-temp">' + Math.round(daily.temperature_2m_max[i]) + '° ' +
+        '<span>' + Math.round(daily.temperature_2m_min[i]) + '°</span></div></div>' +
+        '</div>';
+    }).join('');
+    $('forecast').hidden = false;
+  }
+
   function loadWeather() {
     var loc = C.location;
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat + '&longitude=' + loc.lon +
-      '&current=temperature_2m,weather_code,is_day&timezone=auto';
+      '&current=temperature_2m,weather_code,is_day' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=auto';
     fetch(url).then(function (r) { return r.json(); }).then(function (j) {
       var kind = weatherKind(j.current.weather_code);
       $('weather-icon').innerHTML = '<svg viewBox="0 0 24 24">' + ICONS[kind](j.current.is_day === 0) + '</svg>';
       $('weather-text').textContent = Math.round(j.current.temperature_2m) + '° ' + loc.name;
       $('weather').hidden = false;
+      renderForecast(j.daily);
     }).catch(function () { /* alınamazsa hap gizli kalır */ });
   }
   loadWeather();
