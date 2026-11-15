@@ -149,17 +149,60 @@
       .catch(function () { toast(label + ' açılamadı'); });
   }
 
-  function openApp(key) {
-    if (key === 'playstation') return sendKey('KEY_HDMI' + C.playstationHdmi, 'PlayStation');
-    launchApp(key);
+  /* ---------- HDMI cihazları ---------- */
+  var DEVICE_ICONS = {
+    playstation: '<path d="M7 9h10c3 0 4.6 2.6 5.2 5.6l.8 3.8c.3 1.6-1.6 2.6-2.8 1.5L17.5 17h-11L3.8 19.9c-1.2 1.1-3.1.1-2.8-1.5l.8-3.8C2.4 11.6 4 9 7 9z"/><path d="M7 12v3.4M5.3 13.7h3.4"/>',
+    hdmi: '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>'
+  };
+
+  function renderDevices() {
+    $('devices').innerHTML = C.devices.map(function (dev, i) {
+      return '<button class="device" data-device="' + i + '">' +
+        '<svg viewBox="0 0 24 24">' + (DEVICE_ICONS[dev.icon] || DEVICE_ICONS.hdmi) + '</svg>' +
+        '<span class="device-name">' + dev.name + '</span>' +
+        '<span class="device-port">HDMI ' + dev.hdmi + '</span>' +
+        '</button>';
+    }).join('');
   }
+  renderDevices();
+
+  /* ---------- Fotoğraf arka planı ---------- */
+  var photoLayers = [$('photo-a'), $('photo-b')];
+  var activeLayer = 0;
+  var currentPhoto = -1;
+
+  function showPhoto() {
+    var list = C.photos;
+    if (!list.length) return;
+    // Aynı zaman diliminde hep aynı fotoğraf; yenileyince değişmez
+    var i = Math.floor(Date.now() / (C.photoMinutes * 60000)) % list.length;
+    if (i === currentPhoto) return;
+    var p = typeof list[i] === 'string' ? { src: list[i] } : list[i];
+    var img = new Image();
+    img.onload = function () {
+      currentPhoto = i;
+      var next = photoLayers[1 - activeLayer];
+      next.style.backgroundImage = 'url("' + p.src + '")';
+      next.classList.add('on');
+      photoLayers[activeLayer].classList.remove('on');
+      activeLayer = 1 - activeLayer;
+      $('photo-credit').textContent = p.credit || '';
+      document.body.classList.add('has-photo');
+    };
+    img.src = p.src;
+  }
+  showPhoto();
+  setInterval(showPhoto, 60 * 1000);
+
+  if (!C.blur) document.body.classList.add('no-blur');
 
   /* ---------- Kumanda ile gezinme ---------- */
   var pills = [].slice.call(document.querySelectorAll('.pill:not(.pill-static)'));
   var apps = [].slice.call(document.querySelectorAll('.app'));
-  var grid = [pills, apps];
+  var devices = [].slice.call(document.querySelectorAll('.device'));
+  var grid = devices.length ? [pills, apps, devices] : [pills, apps];
   var pos = { row: 1, col: 0 };
-  var lastCol = [pills.length - 1, 0];
+  var lastCol = [pills.length - 1, 0, 0];
   var CARD_STEP = 316 + 22;
   var VISIBLE = 4;
 
@@ -168,7 +211,11 @@
     var el = grid[pos.row][pos.col];
     el.classList.add('focused');
 
-    if (pos.row === 1) {
+    if (pos.row === 2) {
+      var dev = C.devices[el.dataset.device];
+      $('focus-title').textContent = dev.name;
+      document.documentElement.style.setProperty('--glow', dev.glow || '#3A4A6A');
+    } else if (pos.row === 1) {
       $('focus-title').textContent = C.apps[el.dataset.app].name;
       document.documentElement.style.setProperty('--glow', el.dataset.glow);
       // Odaktaki kart görünür kalsın diye tepsiyi kaydır
@@ -193,7 +240,11 @@
   function activate() {
     var el = grid[pos.row][pos.col];
     if (el.dataset.key) sendKey(el.dataset.key, el.textContent.trim());
-    else if (el.dataset.app) openApp(el.dataset.app);
+    else if (el.dataset.app) launchApp(el.dataset.app);
+    else if (el.dataset.device) {
+      var dev = C.devices[el.dataset.device];
+      sendKey('KEY_HDMI' + dev.hdmi, dev.name);
+    }
   }
 
   document.addEventListener('keydown', function (e) {
@@ -210,7 +261,7 @@
 
   // Önizlemede fareyle de kullanılabilsin
   document.addEventListener('click', function (e) {
-    var el = e.target.closest('.app, .pill');
+    var el = e.target.closest('.app, .pill, .device');
     if (!el) return;
     for (var r = 0; r < grid.length; r++) {
       var c = grid[r].indexOf(el);

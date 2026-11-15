@@ -32,6 +32,39 @@ html, body {
   background: #05060A;
 }
 
+/* Fotoğraf arka planı: iki katman çapraz geçiş yapar */
+.photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+.photo.on { opacity: 1; }
+
+/* Yazılar okunsun diye fotoğrafın üstüne hafif karartma */
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 30%, rgba(0, 0, 0, 0.25) 55%, rgba(0, 0, 0, 0.8) 100%);
+  transition: opacity 2s ease;
+}
+
+.has-photo .shade { opacity: 1; }
+
+.photo-credit {
+  position: absolute;
+  left: 96px;
+  bottom: 28px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 /* Seçili uygulamanın renginde arka plan ışığı */
 .glow {
   position: absolute;
@@ -41,6 +74,33 @@ html, body {
   transition: background-color 0.7s var(--ease);
   -webkit-mask-image: radial-gradient(1000px 700px at 30% 36%, #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
   mask-image: radial-gradient(1000px 700px at 30% 36%, #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
+}
+
+.has-photo .glow { opacity: 0.45; }
+
+/* Buzlu cam paneller */
+.pill, .tray, .forecast, .device {
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+}
+
+.has-photo .pill:not(.focused),
+.has-photo .tray,
+.has-photo .forecast,
+.has-photo .device:not(.focused) {
+  background: rgba(18, 20, 28, 0.38);
+}
+
+.no-blur .pill, .no-blur .tray, .no-blur .forecast, .no-blur .device {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.no-blur.has-photo .pill:not(.focused),
+.no-blur.has-photo .tray,
+.no-blur.has-photo .forecast,
+.no-blur.has-photo .device:not(.focused) {
+  background: rgba(14, 16, 22, 0.72);
 }
 
 /* Üst bar */
@@ -136,7 +196,7 @@ button {
   position: absolute;
   left: 96px;
   right: 0;
-  top: 470px;
+  top: 450px;
 }
 
 .focus-title {
@@ -191,7 +251,6 @@ button {
 .face-youtube { background: #FFFFFF; color: #0F0F0F; }
 .face-youtube .wm { font-size: 36px; letter-spacing: -0.03em; }
 
-.face-ps { background: linear-gradient(150deg, #0A74DA 0%, #003791 100%); }
 .face-prime { background: linear-gradient(150deg, #1A98FF 0%, #0B5FD4 100%); }
 .wm-prime { font-size: 38px; }
 .face-disney { background: linear-gradient(150deg, #0B1A4A 0%, #1A47A0 100%); }
@@ -200,6 +259,60 @@ button {
 .face-browser { background: linear-gradient(150deg, #6A55E8 0%, #3A27A8 100%); }
 .face-st { background: linear-gradient(150deg, #17C2B0 0%, #0A7A8A 100%); }
 .face-st .wm { font-size: 30px; }
+
+/* HDMI cihaz çipleri */
+.devices {
+  display: flex;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.device {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 80px;
+  padding: 0 30px 0 24px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.10);
+  transition: background 0.25s, color 0.25s, transform 0.3s var(--ease);
+}
+
+.device svg {
+  width: 36px;
+  height: 36px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.device-name {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.device-port {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.device.focused {
+  background: var(--text);
+  color: #05060A;
+  transform: scale(1.06);
+}
+
+.device.focused .device-port {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(5, 6, 10, 0.6);
+}
 
 /* Odak: beyaz çerçeve ve hafif büyüme */
 .app.focused .face {
@@ -297,3 +410,13 @@ button {
 @media (prefers-reduced-motion: reduce) {
   *, *::after { transition: none !important; }
 }
+
+/* Fotoğraf üzerinde yazılar okunaklı kalsın */
+.has-photo .greeting,
+.has-photo .time-line,
+.has-photo .focus-title,
+.has-photo .today-summary {
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+
+.has-photo .today-summary { color: rgba(244, 245, 248, 0.85); }

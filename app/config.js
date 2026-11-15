@@ -6,14 +6,23 @@ window.CONFIG = {
   // Hava durumu konumu
   location: { name: 'Lehrte', lat: 52.3725, lon: 9.9769 },
 
-  // PlayStation'ın bağlı olduğu HDMI girişi (1–4).
-  playstationHdmi: 1,
+  // HDMI'ya bağlı cihazlar. Seçilince TV o girişe geçer.
+  devices: [
+    { name: 'PlayStation 5', hdmi: 1, icon: 'playstation', glow: '#0A5BC4' }
+  ],
+
+  // Arka plan fotoğrafları: dosya yolu (photos/...) ya da internet adresi.
+  // credit: sol altta küçük yazıyla gösterilir (boş olabilir).
+  photos: [],
+  photoMinutes: 30,
+
+  // Paneller buzlu cam gibi bulanık olsun mu? TV kasarsa false yap.
+  blur: true,
 
   // TV'deki uygulama kimlikleri. Bulunamazsa isimden aranır.
   apps: {
     netflix: { ids: ['3201907018807', '11101200001'], name: 'Netflix' },
     youtube: { ids: ['111299001912'], name: 'YouTube' },
-    playstation: { ids: [], name: 'PlayStation' },
     prime: { ids: ['3201512006785'], name: 'Prime Video' },
     disney: { ids: ['3201901017640'], name: 'Disney+' },
     spotify: { ids: ['3201606009684'], name: 'Spotify' },

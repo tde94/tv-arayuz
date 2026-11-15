@@ -11,6 +11,9 @@
 </head>
 <body>
   <div id="stage">
+    <div class="photo" id="photo-a"></div>
+    <div class="photo" id="photo-b"></div>
+    <div class="shade"></div>
     <div class="glow" id="glow"></div>
 
     <header class="top">
@@ -50,17 +53,6 @@
             <span class="face face-youtube">
               <svg viewBox="0 0 40 28" class="yt-play" aria-hidden="true"><rect width="40" height="28" rx="8" fill="#FF0033"/><path d="M16 8v12l10-6z" fill="#fff"/></svg>
               <span class="wm">YouTube</span>
-            </span>
-          </button>
-          <button class="app" data-app="playstation" data-glow="#0A5BC4">
-            <span class="face face-ps">
-              <svg viewBox="0 0 64 64" class="glyph" aria-hidden="true">
-                <g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 24h22c7 0 11 6 12.5 13l2 9.5c.8 4-3.8 6.5-6.8 3.6L44 43H20l-6.7 7.1c-3 2.9-7.6.4-6.8-3.6l2-9.5C10 30 14 24 21 24z"/>
-                  <path d="M20 31v8M16 35h8"/>
-                </g>
-              </svg>
-              <span class="wm">PlayStation</span>
             </span>
           </button>
           <button class="app" data-app="prime" data-glow="#0B6FD6">
@@ -104,12 +96,16 @@
           </button>
         </div>
       </div>
+
+      <div class="devices" id="devices"></div>
     </main>
 
     <aside class="weekly" id="weekly" hidden aria-label="7 günlük hava durumu">
       <div class="forecast" id="forecast"></div>
       <p class="today-summary" id="today-summary"></p>
     </aside>
+
+    <p class="photo-credit" id="photo-credit"></p>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
