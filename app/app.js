@@ -388,9 +388,10 @@
   var pills = [].slice.call(document.querySelectorAll('.pill:not(.pill-static)'));
   var apps = [].slice.call(document.querySelectorAll('.app'));
   var devices = [].slice.call(document.querySelectorAll('.device'));
-  var grid = devices.length ? [pills, apps, devices] : [pills, apps];
-  var pos = { row: 1, col: 0 };
-  var lastCol = [pills.length - 1, 0, 0];
+  // Boş satırlar (buton ya da cihaz yoksa) gezinmeye katılmaz
+  var grid = [pills, apps, devices].filter(function (r) { return r.length; });
+  var pos = { row: grid.indexOf(apps), col: 0 };
+  var lastCol = grid.map(function () { return 0; });
   var CARD_STEP = 316 + 22;
   var VISIBLE = 4;
 
@@ -399,11 +400,11 @@
     var el = grid[pos.row][pos.col];
     el.classList.add('focused');
 
-    if (pos.row === 2) {
+    if (el.dataset.device) {
       var dev = C.devices[el.dataset.device];
       $('focus-title').textContent = dev.name;
       document.documentElement.style.setProperty('--glow', dev.glow || '#3A4A6A');
-    } else if (pos.row === 1) {
+    } else if (el.dataset.app) {
       $('focus-title').textContent = C.apps[el.dataset.app].name;
       document.documentElement.style.setProperty('--glow', el.dataset.glow);
       // Odaktaki kart görünür kalsın diye tepsiyi kaydır

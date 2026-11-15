@@ -7,9 +7,9 @@ window.CONFIG = {
   location: { name: 'Lehrte', lat: 52.3725, lon: 9.9769 },
 
   // HDMI'ya bağlı cihazlar. Seçilince TV o girişe geçer.
-  devices: [
-    { name: 'PlayStation 5', hdmi: 1, icon: 'playstation', glow: '#0A5BC4' }
-  ],
+  // TV kendi içinden gönderilen kumanda tuşlarını uygulamadığı için şimdilik boş;
+  // PS5'e HDMI-CEC ile (PS tuşu) geçiliyor.
+  devices: [],
 
   // Arka plan fotoğrafları (Tunceli): dosya yolu (photos/...) ya da internet adresi.
   // credit: sol altta küçük yazıyla gösterilir (boş olabilir).
