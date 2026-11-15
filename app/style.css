@@ -136,7 +136,7 @@ button {
   position: absolute;
   left: 96px;
   right: 0;
-  top: 400px;
+  top: 470px;
 }
 
 .focus-title {
@@ -209,34 +209,40 @@ button {
     0 24px 48px rgba(0, 0, 0, 0.5);
 }
 
-/* 7 günlük hava durumu */
-.forecast {
+/* 7 günlük hava durumu: sağ üstte, butonların altında */
+.weekly {
   position: absolute;
-  left: 96px;
+  top: 158px;
   right: 96px;
-  bottom: 64px;
-  display: flex;
-  gap: 12px;
+  width: 640px;
 }
 
-.forecast[hidden] { display: none; }
+.weekly[hidden] { display: none; }
+
+.forecast {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 18px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.08);
+}
 
 .day {
-  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 18px 22px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 8px;
+  width: 80px;
+  padding: 10px 0;
+  border-radius: 16px;
 }
 
-.day-today { background: rgba(255, 255, 255, 0.11); }
+.day-today { background: rgba(255, 255, 255, 0.10); }
 
 .day svg {
-  flex: none;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   fill: none;
   stroke: var(--text);
   stroke-width: 1.6;
@@ -245,20 +251,30 @@ button {
 }
 
 .day-name {
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--muted);
 }
 
 .day-temp {
-  margin-top: 2px;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .day-temp span {
+  display: block;
   font-weight: 500;
+  color: var(--muted);
+}
+
+.today-summary {
+  margin-top: 16px;
+  padding: 0 6px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--muted);
 }
 

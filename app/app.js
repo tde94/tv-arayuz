@@ -63,9 +63,14 @@
     partly: function () { return CLOUD; },
     cloudy: function () { return CLOUD; },
     fog: function () { return '<path d="M4 9h16M3 13h18M5 17h14"/>'; },
-    rain: function () { return CLOUD + '<path d="M9 21l-1 1M13 21l-1 1"/>'; },
+    rain: function () { return CLOUD + '<path d="M8.5 20l-1 2.5M12.5 20l-1 2.5M16.5 20l-1 2.5"/>'; },
     snow: function () { return CLOUD + '<path d="M9 21h.01M13 21h.01"/>'; },
     storm: function () { return CLOUD + '<path d="M12 18l-2 3h3l-2 3"/>'; }
+  };
+
+  var LABELS = {
+    clear: 'açık', partly: 'parçalı bulutlu', cloudy: 'bulutlu', fog: 'sisli',
+    rain: 'yağmurlu', snow: 'karlı', storm: 'fırtınalı'
   };
 
   function weatherKind(code) {
@@ -80,13 +85,16 @@
       var name = i === 0 ? 'Bugün' : d.toLocaleDateString('tr-TR', { weekday: 'short' });
       var kind = weatherKind(daily.weather_code[i]);
       return '<div class="day' + (i === 0 ? ' day-today' : '') + '">' +
+        '<div class="day-name">' + name + '</div>' +
         '<svg viewBox="0 0 24 24">' + ICONS[kind](false) + '</svg>' +
-        '<div><div class="day-name">' + name + '</div>' +
-        '<div class="day-temp">' + Math.round(daily.temperature_2m_max[i]) + '° ' +
-        '<span>' + Math.round(daily.temperature_2m_min[i]) + '°</span></div></div>' +
+        '<div class="day-temp">' + Math.round(daily.temperature_2m_max[i]) + '°' +
+        '<span>' + Math.round(daily.temperature_2m_min[i]) + '°</span></div>' +
         '</div>';
     }).join('');
-    $('forecast').hidden = false;
+    $('today-summary').textContent = 'Bugün hava ' + LABELS[weatherKind(daily.weather_code[0])] +
+      ', en yüksek ' + Math.round(daily.temperature_2m_max[0]) + '°, en düşük ' +
+      Math.round(daily.temperature_2m_min[0]) + '°.';
+    $('weekly').hidden = false;
   }
 
   function loadWeather() {
